@@ -14,98 +14,93 @@ public class PoseAnalyzer : MonoBehaviour
     /// <summary>
     /// Neural network model
     /// </summary>
-    public NNModel ModelData;
+    public NNModel modelData;
 
-    public WorkerFactory.Type WorkerType = WorkerFactory.Type.Auto;
-    public bool DebugMode = true;
+    public WorkerFactory.Type workerType = WorkerFactory.Type.Auto;
+    public bool debugMode = true;
 
-    public VNectModel PoseModel;
-    public StreamHandler VideoStreamHandler;
+    public PoseModel poseModel;
+    public StreamHandler videoStreamHandler;
 
-    private Model poseModel;
-    private IWorker poseWorker;
-    private VNectModel.JointPoint[] jointPositions;
+    private Model _poseModel;
+    private IWorker _poseWorker;
+    private PoseModel.JointPoint[] _jointPositions;
 
     private const int TotalJoints = 24;
     
-    public int TargetImageSize;
-    private float HalfImageSize;
+    public int targetImageSize;
+    private float _halfImageSize;
 
-
-    public int HeatMapColumns;
-    private float ImageSizeFloat;
-
-
-    private int HeatMapColumnsSquared;
-    private int HeatMapColumnsCubed;
-    private float ImageResizeFactor;
-
-
-    private float[] twoDHeatMap;
-    private float[] twoDOffsets;
-    private float[] threeDHeatMap;
-
-    private float[] threeDOffsets;
-    private float scaleUnit;
+    public int heatMapColumns;
+    private float _imageSizeFloat;
     
+    private int _heatMapColumnsSquared;
+    private int _heatMapColumnsCubed;
+    private float _imageResizeFactor;
 
-    private int DoubleJointCount = TotalJoints * 2;
-    private int TripleJointCount = TotalJoints * 3;
+    private float[] _twoDHeatMap;
+    private float[] _twoDOffsets;
+    private float[] _threeDHeatMap;
+    private float[] _threeDOffsets;
+    private float _scaleUnit;
+
+    private const int DoubleJointCount = TotalJoints * 2;
+    private const int TripleJointCount = TotalJoints * 3;
 
 
-    private int HeatMapJointProduct;
-    private int LinearCubeOffset;
-    private int SquaredCubeOffset;
+    private int _heatMapJointProduct;
+    private int _linearCubeOffset;
+    private int _squaredCubeOffset;
     
-    public float KalmanQ;
-    public float KalmanR;
+    public float kalmanQ;
+    public float kalmanR;
     
-    private bool UpdateLock = true;
+    private bool _updateLock = true;
 
-    public bool EnableSmoothing;
-    public float SmoothingFactor;
+    public bool enableSmoothing;
+    public float smoothingFactor;
 
-    public Text StatusMessage;
-    public float ModelLoadingDelay = 10f;
-    private float LoadingCountdown = 0;
-    public Texture2D PlaceholderImage;
-    private float AveragePerformanceScore = 0.0f;
-    private int UpdateCycleCount = 0;
-    private float TotalProcessingTime = 0.0f; // Загальний час обробки усіх кадрів
-    private int ProcessedFrames = 0; // Кількість оброблених кадрів
-    private Stopwatch processingTimer = new Stopwatch(); // Таймер для вимірювання часу обробки
+    public Text statusMessage;
+    public float modelLoadingDelay = 10f;
+    private float _loadingCountdown = 0;
+    public Texture2D placeholderImage;
+    private float _averagePerformanceScore = 0.0f;
+    private int _updateCycleCount = 0;
+    private float _totalProcessingTime = 0.0f; // Загальний час обробки усіх кадрів
+    private int _processedFrames = 0; // Кількість оброблених кадрів
+    private readonly Stopwatch _processingTimer = new Stopwatch(); // Таймер для вимірювання часу обробки
 
     private void Start()
     {
-        HeatMapColumnsSquared = HeatMapColumns * HeatMapColumns;
-        HeatMapColumnsCubed = HeatMapColumns * HeatMapColumns * HeatMapColumns;
-        HeatMapJointProduct = HeatMapColumns * TotalJoints;
-        LinearCubeOffset = HeatMapColumns * TripleJointCount;
-        SquaredCubeOffset = HeatMapColumnsSquared * TripleJointCount;
+        _heatMapColumnsSquared = heatMapColumns * heatMapColumns;
+        _heatMapColumnsCubed = heatMapColumns * heatMapColumns * heatMapColumns;
+        _heatMapJointProduct = heatMapColumns * TotalJoints;
+        _linearCubeOffset = heatMapColumns * TripleJointCount;
+        _squaredCubeOffset = _heatMapColumnsSquared * TripleJointCount;
 
-        twoDHeatMap = new float[TotalJoints * HeatMapColumnsSquared];
-        twoDOffsets = new float[TotalJoints * HeatMapColumnsSquared * 2];
-        threeDHeatMap = new float[TotalJoints * HeatMapColumnsCubed];
-        threeDOffsets = new float[TotalJoints * HeatMapColumnsCubed * 3];
-        scaleUnit = 1f / (float)HeatMapColumns;
-        ImageSizeFloat = TargetImageSize;
-        HalfImageSize = ImageSizeFloat / 2f;
-        ImageResizeFactor = TargetImageSize / (float)HeatMapColumns;
+        _twoDHeatMap = new float[TotalJoints * _heatMapColumnsSquared];
+        _twoDOffsets = new float[TotalJoints * _heatMapColumnsSquared * 2];
+        _threeDHeatMap = new float[TotalJoints * _heatMapColumnsCubed];
+        _threeDOffsets = new float[TotalJoints * _heatMapColumnsCubed * 3];
+        _scaleUnit = 1f / (float)heatMapColumns;
+        _imageSizeFloat = targetImageSize;
+        _halfImageSize = _imageSizeFloat / 2f;
+        _imageResizeFactor = targetImageSize / (float)heatMapColumns;
 
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
-        poseModel = ModelLoader.Load(ModelData, DebugMode);
-        poseWorker = WorkerFactory.CreateWorker(WorkerType, poseModel, DebugMode);
+        _poseModel = ModelLoader.Load(modelData, debugMode);
+        _poseWorker = WorkerFactory.CreateWorker(workerType, _poseModel, debugMode);
 
         StartCoroutine("WaitForModelLoad");
     }
 
     private void Update()
     {
-        if (!UpdateLock)
+        if (!_updateLock)
         {
-            processingTimer.Reset(); // Скидання таймера
-            processingTimer.Start(); // Запуск таймера перед обробкою кадру
+            _processingTimer.Reset(); // Скидання таймера
+            _processingTimer.Start(); // Запуск таймера перед обробкою кадру
 
             UpdateVNectModel();
         
@@ -113,26 +108,26 @@ public class PoseAnalyzer : MonoBehaviour
 
             for (int j = 0; j < TotalJoints; j++)
             {
-                totalScore += jointPositions[j].score3D;
+                totalScore += _jointPositions[j].Confidence3D;
             }
 
             float averageScore = totalScore / TotalJoints; 
-            AveragePerformanceScore += averageScore; 
-            UpdateCycleCount++;
+            _averagePerformanceScore += averageScore; 
+            _updateCycleCount++;
 
-            processingTimer.Stop(); // Зупинка таймера після обробки кадру
-            float frameTime = (float)processingTimer.Elapsed.TotalMilliseconds; // Час обробки одного кадру в мілісекундах
-            TotalProcessingTime += frameTime; // Додавання часу кадру до загального часу
-            ProcessedFrames++; // Збільшення лічильника кадрів
+            _processingTimer.Stop(); // Зупинка таймера після обробки кадру
+            float frameTime = (float)_processingTimer.Elapsed.TotalMilliseconds; // Час обробки одного кадру в мілісекундах
+            _totalProcessingTime += frameTime; // Додавання часу кадру до загального часу
+            _processedFrames++; // Збільшення лічильника кадрів
 
             // Debug.Log("Текущий средний score3D: " + averageScore);
             // Debug.Log("Час обробки кадру: " + frameTime + " ms");
         }
 
-        if (UpdateCycleCount > 0)
+        if (_updateCycleCount > 0)
         {
-            float cumulativeAverageScore = AveragePerformanceScore / UpdateCycleCount;
-            float averageFrameTime = TotalProcessingTime / ProcessedFrames; // Середній час обробки кадру
+            float cumulativeAverageScore = _averagePerformanceScore / _updateCycleCount;
+            float averageFrameTime = _totalProcessingTime / _processedFrames; // Середній час обробки кадру
             // Debug.Log("Средний score3D за все время: " + cumulativeAverageScore);
             // Debug.Log("Середній час обробки кадру: " + averageFrameTime + " ms");
         }
@@ -140,22 +135,22 @@ public class PoseAnalyzer : MonoBehaviour
     
     private IEnumerator WaitForModelLoad()
     {
-        inputs[inputName_1] = new Tensor(PlaceholderImage);
-        inputs[inputName_2] = new Tensor(PlaceholderImage);
-        inputs[inputName_3] = new Tensor(PlaceholderImage);
+        inputs[inputName_1] = new Tensor(placeholderImage);
+        inputs[inputName_2] = new Tensor(placeholderImage);
+        inputs[inputName_3] = new Tensor(placeholderImage);
 
         // Create input and Execute model
-        yield return poseWorker.StartManualSchedule(inputs);
+        yield return _poseWorker.StartManualSchedule(inputs);
 
         // Get outputs
-        for (var i = 2; i < poseModel.outputs.Count; i++)
+        for (var i = 2; i < _poseModel.outputs.Count; i++)
         {
-            b_outputs[i] = poseWorker.PeekOutput(poseModel.outputs[i]);
+            b_outputs[i] = _poseWorker.PeekOutput(_poseModel.outputs[i]);
         }
 
         // Get data from outputs
-        threeDOffsets = b_outputs[2].data.Download(b_outputs[2].shape);
-        threeDHeatMap = b_outputs[3].data.Download(b_outputs[3].shape);
+        _threeDOffsets = b_outputs[2].data.Download(b_outputs[2].shape);
+        _threeDHeatMap = b_outputs[3].data.Download(b_outputs[3].shape);
 
         // Release outputs
         for (var i = 2; i < b_outputs.Length; i++)
@@ -164,16 +159,16 @@ public class PoseAnalyzer : MonoBehaviour
         }
 
         // Init VNect model
-        jointPositions = PoseModel.Init();
+        _jointPositions = poseModel.Init();
 
         PredictPose();
 
-        yield return new WaitForSeconds(ModelLoadingDelay);
+        yield return new WaitForSeconds(modelLoadingDelay);
 
         // Init VideoCapture
-        VideoStreamHandler.Init(TargetImageSize, TargetImageSize);
-        UpdateLock = false;
-        StatusMessage.gameObject.SetActive(false);
+        videoStreamHandler.Init(targetImageSize, targetImageSize);
+        _updateLock = false;
+        statusMessage.gameObject.SetActive(false);
     }
 
     private const string inputName_1 = "input.1";
@@ -187,12 +182,12 @@ public class PoseAnalyzer : MonoBehaviour
 
     private void UpdateVNectModel()
     {
-        input = new Tensor(VideoStreamHandler.OutputTexture);
+        input = new Tensor(videoStreamHandler.OutputTexture);
         if (inputs[inputName_1] == null)
         {
             inputs[inputName_1] = input;
-            inputs[inputName_2] = new Tensor(VideoStreamHandler.OutputTexture);
-            inputs[inputName_3] = new Tensor(VideoStreamHandler.OutputTexture);
+            inputs[inputName_2] = new Tensor(videoStreamHandler.OutputTexture);
+            inputs[inputName_3] = new Tensor(videoStreamHandler.OutputTexture);
         }
         else
         {
@@ -205,11 +200,7 @@ public class PoseAnalyzer : MonoBehaviour
 
         StartCoroutine(ExecuteModelAsync());
     }
-
-    /// <summary>
-    /// Tensor has input image
-    /// </summary>
-    /// <returns></returns>
+    
     Tensor input = new Tensor();
     Dictionary<string, Tensor> inputs = new Dictionary<string, Tensor>() { { inputName_1, null }, { inputName_2, null }, { inputName_3, null }, };
     Tensor[] b_outputs = new Tensor[4];
@@ -217,17 +208,17 @@ public class PoseAnalyzer : MonoBehaviour
     private IEnumerator ExecuteModelAsync()
     {
         // Create input and Execute model
-        yield return poseWorker.StartManualSchedule(inputs);
+        yield return _poseWorker.StartManualSchedule(inputs);
 
         // Get outputs
-        for (var i = 2; i < poseModel.outputs.Count; i++)
+        for (var i = 2; i < _poseModel.outputs.Count; i++)
         {
-            b_outputs[i] = poseWorker.PeekOutput(poseModel.outputs[i]);
+            b_outputs[i] = _poseWorker.PeekOutput(_poseModel.outputs[i]);
         }
 
         // Get data from outputs
-        threeDOffsets = b_outputs[2].data.Download(b_outputs[2].shape);
-        threeDHeatMap = b_outputs[3].data.Download(b_outputs[3].shape);
+        _threeDOffsets = b_outputs[2].data.Download(b_outputs[2].shape);
+        _threeDHeatMap = b_outputs[3].data.Download(b_outputs[3].shape);
         
         // Release outputs
         for (var i = 2; i < b_outputs.Length; i++)
@@ -237,31 +228,36 @@ public class PoseAnalyzer : MonoBehaviour
 
         PredictPose();
     }
-
-    /// <summary>
-    /// Predict positions of each of joints based on network
-    /// </summary>
+    
     private void PredictPose()
+    {
+        CalculateJointPositions();
+        CalculateSpecialJointPositions();
+        ApplyKalmanFilter();
+        ApplySmoothingFilter();
+    }
+
+    private void CalculateJointPositions()
     {
         for (var j = 0; j < TotalJoints; j++)
         {
             var maxXIndex = 0;
             var maxYIndex = 0;
             var maxZIndex = 0;
-            jointPositions[j].score3D = 0.0f;
-            var jj = j * HeatMapColumns;
-            for (var z = 0; z < HeatMapColumns; z++)
+            _jointPositions[j].Confidence3D = 0.0f;
+            var jj = j * heatMapColumns;
+            for (var z = 0; z < heatMapColumns; z++)
             {
                 var zz = jj + z;
-                for (var y = 0; y < HeatMapColumns; y++)
+                for (var y = 0; y < heatMapColumns; y++)
                 {
-                    var yy = y * HeatMapColumnsSquared * TotalJoints + zz;
-                    for (var x = 0; x < HeatMapColumns; x++)
+                    var yy = y * _heatMapColumnsSquared * TotalJoints + zz;
+                    for (var x = 0; x < heatMapColumns; x++)
                     {
-                        float v = threeDHeatMap[yy + x * HeatMapJointProduct];
-                        if (v > jointPositions[j].score3D)
+                        float v = _threeDHeatMap[yy + x * _heatMapJointProduct];
+                        if (v > _jointPositions[j].Confidence3D)
                         {
-                            jointPositions[j].score3D = v;
+                            _jointPositions[j].Confidence3D = v;
                             maxXIndex = x;
                             maxYIndex = y;
                             maxZIndex = z;
@@ -270,69 +266,68 @@ public class PoseAnalyzer : MonoBehaviour
                 }
             }
            
-            jointPositions[j].Now3D.x = (threeDOffsets[maxYIndex * SquaredCubeOffset + maxXIndex * LinearCubeOffset + j * HeatMapColumns + maxZIndex] + 0.5f + (float)maxXIndex) * ImageResizeFactor - HalfImageSize;
-            jointPositions[j].Now3D.y = HalfImageSize - (threeDOffsets[maxYIndex * SquaredCubeOffset + maxXIndex * LinearCubeOffset + (j + TotalJoints) * HeatMapColumns + maxZIndex] + 0.5f + (float)maxYIndex) * ImageResizeFactor;
-            jointPositions[j].Now3D.z = (threeDOffsets[maxYIndex * SquaredCubeOffset + maxXIndex * LinearCubeOffset + (j + DoubleJointCount) * HeatMapColumns + maxZIndex] + 0.5f + (float)(maxZIndex - 14)) * ImageResizeFactor;
+            _jointPositions[j].CurrentPosition3D.x = (_threeDOffsets[maxYIndex * _squaredCubeOffset + maxXIndex * _linearCubeOffset + j * heatMapColumns + maxZIndex] + 0.5f + (float)maxXIndex) * _imageResizeFactor - _halfImageSize;
+            _jointPositions[j].CurrentPosition3D.y = _halfImageSize - (_threeDOffsets[maxYIndex * _squaredCubeOffset + maxXIndex * _linearCubeOffset + (j + TotalJoints) * heatMapColumns + maxZIndex] + 0.5f + (float)maxYIndex) * _imageResizeFactor;
+            _jointPositions[j].CurrentPosition3D.z = (_threeDOffsets[maxYIndex * _squaredCubeOffset + maxXIndex * _linearCubeOffset + (j + DoubleJointCount) * heatMapColumns + maxZIndex] + 0.5f + (float)(maxZIndex - 14)) * _imageResizeFactor;
         }
+    }
+    
+    private void CalculateSpecialJointPositions()
+    {
+        var lc = (_jointPositions[BodyJoint.rightUpperLeg.Int()].CurrentPosition3D + _jointPositions[BodyJoint.leftUpperLeg.Int()].CurrentPosition3D) / 2f;
+        _jointPositions[BodyJoint.centerHip.Int()].CurrentPosition3D = (_jointPositions[BodyJoint.upperAbdomen.Int()].CurrentPosition3D + lc) / 2f;
 
-        // Calculate hip location
-        var lc = (jointPositions[PositionIndex.rThighBend.Int()].Now3D + jointPositions[PositionIndex.lThighBend.Int()].Now3D) / 2f;
-        jointPositions[PositionIndex.hip.Int()].Now3D = (jointPositions[PositionIndex.abdomenUpper.Int()].Now3D + lc) / 2f;
+        _jointPositions[BodyJoint.centralNeck.Int()].CurrentPosition3D = (_jointPositions[BodyJoint.rightShoulder.Int()].CurrentPosition3D + _jointPositions[BodyJoint.leftShoulder.Int()].CurrentPosition3D) / 2f;
 
-        // Calculate neck location
-        jointPositions[PositionIndex.neck.Int()].Now3D = (jointPositions[PositionIndex.rShldrBend.Int()].Now3D + jointPositions[PositionIndex.lShldrBend.Int()].Now3D) / 2f;
-
-        // Calculate head location
-        var cEar = (jointPositions[PositionIndex.rEar.Int()].Now3D + jointPositions[PositionIndex.lEar.Int()].Now3D) / 2f;
-        var hv = cEar - jointPositions[PositionIndex.neck.Int()].Now3D;
+        var cEar = (_jointPositions[BodyJoint.rightEar.Int()].CurrentPosition3D + _jointPositions[BodyJoint.leftEar.Int()].CurrentPosition3D) / 2f;
+        var hv = cEar - _jointPositions[BodyJoint.centralNeck.Int()].CurrentPosition3D;
         var nhv = Vector3.Normalize(hv);
-        var nv = jointPositions[PositionIndex.Nose.Int()].Now3D - jointPositions[PositionIndex.neck.Int()].Now3D;
-        jointPositions[PositionIndex.head.Int()].Now3D = jointPositions[PositionIndex.neck.Int()].Now3D + nhv * Vector3.Dot(nhv, nv);
+        var nv = _jointPositions[BodyJoint.centralNose.Int()].CurrentPosition3D - _jointPositions[BodyJoint.centralNeck.Int()].CurrentPosition3D;
+        _jointPositions[BodyJoint.topHead.Int()].CurrentPosition3D = _jointPositions[BodyJoint.centralNeck.Int()].CurrentPosition3D + nhv * Vector3.Dot(nhv, nv);
 
-        // Calculate spine location
-        jointPositions[PositionIndex.spine.Int()].Now3D = jointPositions[PositionIndex.abdomenUpper.Int()].Now3D;
-
-        // Kalman filter
-        foreach (var jp in jointPositions)
+        _jointPositions[BodyJoint.middleSpine.Int()].CurrentPosition3D = _jointPositions[BodyJoint.upperAbdomen.Int()].CurrentPosition3D;
+    }
+    
+    private void ApplyKalmanFilter()
+    {
+        foreach (var jp in _jointPositions)
         {
             KalmanUpdate(jp);
         }
-
-        // Low pass filter
-        if (EnableSmoothing)
+    }   
+    
+    private void ApplySmoothingFilter()
+    {
+        if (enableSmoothing)
         {
-            foreach (var jp in jointPositions)
+            foreach (var jp in _jointPositions)
             {
-                jp.PrevPos3D[0] = jp.Pos3D;
-                for (var i = 1; i < jp.PrevPos3D.Length; i++)
+                jp.HistoricalPositions3D[0] = jp.Position3D;
+                for (var i = 1; i < jp.HistoricalPositions3D.Length; i++)
                 {
-                    jp.PrevPos3D[i] = jp.PrevPos3D[i] * SmoothingFactor + jp.PrevPos3D[i - 1] * (1f - SmoothingFactor);
+                    jp.HistoricalPositions3D[i] = jp.HistoricalPositions3D[i] * smoothingFactor + jp.HistoricalPositions3D[i - 1] * (1f - smoothingFactor);
                 }
-                jp.Pos3D = jp.PrevPos3D[jp.PrevPos3D.Length - 1];
+                jp.Position3D = jp.HistoricalPositions3D[jp.HistoricalPositions3D.Length - 1];
             }
         }
     }
 
-    /// <summary>
-    /// Kalman filter
-    /// </summary>
-    /// <param name="measurement">joint points</param>
-    void KalmanUpdate(VNectModel.JointPoint measurement)
+    private void KalmanUpdate(PoseModel.JointPoint measurement)
     {
-        measurementUpdate(measurement);
-        measurement.Pos3D.x = measurement.X.x + (measurement.Now3D.x - measurement.X.x) * measurement.K.x;
-        measurement.Pos3D.y = measurement.X.y + (measurement.Now3D.y - measurement.X.y) * measurement.K.y;
-        measurement.Pos3D.z = measurement.X.z + (measurement.Now3D.z - measurement.X.z) * measurement.K.z;
-        measurement.X = measurement.Pos3D;
+        MeasurementUpdate(measurement);
+        measurement.Position3D.x = measurement.EstimatedState.x + (measurement.CurrentPosition3D.x - measurement.EstimatedState.x) * measurement.KalmanGain.x;
+        measurement.Position3D.y = measurement.EstimatedState.y + (measurement.CurrentPosition3D.y - measurement.EstimatedState.y) * measurement.KalmanGain.y;
+        measurement.Position3D.z = measurement.EstimatedState.z + (measurement.CurrentPosition3D.z - measurement.EstimatedState.z) * measurement.KalmanGain.z;
+        measurement.EstimatedState = measurement.Position3D;
     }
 
-	void measurementUpdate(VNectModel.JointPoint measurement)
+    private void MeasurementUpdate(PoseModel.JointPoint measurement)
     {
-        measurement.K.x = (measurement.P.x + KalmanQ) / (measurement.P.x + KalmanQ + KalmanR);
-        measurement.K.y = (measurement.P.y + KalmanQ) / (measurement.P.y + KalmanQ + KalmanR);
-        measurement.K.z = (measurement.P.z + KalmanQ) / (measurement.P.z + KalmanQ + KalmanR);
-        measurement.P.x = KalmanR * (measurement.P.x + KalmanQ) / (KalmanR + measurement.P.x + KalmanQ);
-        measurement.P.y = KalmanR * (measurement.P.y + KalmanQ) / (KalmanR + measurement.P.y + KalmanQ);
-        measurement.P.z = KalmanR * (measurement.P.z + KalmanQ) / (KalmanR + measurement.P.z + KalmanQ);
+        measurement.KalmanGain.x = (measurement.PredictionError.x + kalmanQ) / (measurement.PredictionError.x + kalmanQ + kalmanR);
+        measurement.KalmanGain.y = (measurement.PredictionError.y + kalmanQ) / (measurement.PredictionError.y + kalmanQ + kalmanR);
+        measurement.KalmanGain.z = (measurement.PredictionError.z + kalmanQ) / (measurement.PredictionError.z + kalmanQ + kalmanR);
+        measurement.PredictionError.x = kalmanR * (measurement.PredictionError.x + kalmanQ) / (kalmanR + measurement.PredictionError.x + kalmanQ);
+        measurement.PredictionError.y = kalmanR * (measurement.PredictionError.y + kalmanQ) / (kalmanR + measurement.PredictionError.y + kalmanQ);
+        measurement.PredictionError.z = kalmanR * (measurement.PredictionError.z + kalmanQ) / (kalmanR + measurement.PredictionError.z + kalmanQ);
     }
 }

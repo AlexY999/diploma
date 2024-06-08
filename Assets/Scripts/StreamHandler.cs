@@ -94,7 +94,7 @@ public class StreamHandler : MonoBehaviour
 
         var cam = go.GetComponent<Camera>();
         cam.orthographic = true;
-        cam.orthographicSize = 0.5f;
+        cam.orthographicSize = 0.75f;
         cam.depth = -5;
         cam.depthTextureMode = DepthTextureMode.None;
         cam.clearFlags = CameraClearFlags.Color;

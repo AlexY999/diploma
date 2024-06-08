@@ -370,20 +370,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a27889227d895094c8cd75784aa13cc2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ModelData: {fileID: 5022602860645237092, guid: 425a9680555ad488ba815c3f6cd12965, type: 3}
-  WorkerType: 256
-  DebugMode: 0
-  PoseModel: {fileID: 729426691}
-  VideoStreamHandler: {fileID: 2007410391}
-  TargetImageSize: 448
-  HeatMapColumns: 28
-  KalmanQ: 0.001
-  KalmanR: 0.0015
-  EnableSmoothing: 1
-  SmoothingFactor: 0.1
-  StatusMessage: {fileID: 722966693}
-  ModelLoadingDelay: 0.1
-  PlaceholderImage: {fileID: 2800000, guid: ad05e7fc23ec7df40acf63ce37cc522f, type: 3}
+  modelData: {fileID: 5022602860645237092, guid: 425a9680555ad488ba815c3f6cd12965, type: 3}
+  workerType: 32768
+  debugMode: 0
+  poseModel: {fileID: 729426694}
+  videoStreamHandler: {fileID: 2007410391}
+  targetImageSize: 448
+  heatMapColumns: 28
+  kalmanQ: 0.01
+  kalmanR: 0.015
+  enableSmoothing: 1
+  smoothingFactor: 0.2
+  statusMessage: {fileID: 722966693}
+  modelLoadingDelay: 1
+  placeholderImage: {fileID: 2800000, guid: ad05e7fc23ec7df40acf63ce37cc522f, type: 3}
 --- !u!4 &311898632
 Transform:
   m_ObjectHideFlags: 0
@@ -660,10 +660,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 48874804}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 800, y: 60}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 200, y: -30}
+  m_SizeDelta: {x: 400, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &722966693
 MonoBehaviour:
@@ -712,7 +712,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 3163856921800314800, guid: c257f18b5741740b09d56ad93839d5d2, type: 3}
   m_PrefabInstance: {fileID: 1921113012}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &729426691
+--- !u!114 &729426694
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -724,15 +724,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3558338e378282c4a91d1a3356b57301, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SkeletonMaterial: {fileID: 2100000, guid: 095ac27b943d6b84a902d286af3ef56d, type: 2}
-  ShowSkeleton: 1
-  SkeletonX: -1
-  SkeletonY: 0.9
-  SkeletonZ: 0
-  SkeletonScale: 0.006
-  ModelObject: {fileID: 729426690}
-  Nose: {fileID: 718633766}
-  ZScale: 1
+  connectionMaterial: {fileID: 2100000, guid: 095ac27b943d6b84a902d286af3ef56d, type: 2}
+  showSkeleton: 1
+  skeletonOffsetX: -1.5
+  skeletonOffsetY: 0.9
+  skeletonOffsetZ: 0
+  skeletonScale: 0.008
+  avatarObject: {fileID: 729426690}
+  avatarNose: {fileID: 718633766}
+  zVerticalScale: 0.8
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -910,7 +910,7 @@ VideoPlayer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1508644617}
   m_Enabled: 1
-  m_VideoClip: {fileID: 32900000, guid: 09f5bce4d56b6472ea0cb3fd74d89cb4, type: 3}
+  m_VideoClip: {fileID: 32900000, guid: e8c3c3e4477a049b88e56eaf1122dfa6, type: 3}
   m_TargetCameraAlpha: 1
   m_TargetCamera3DLayout: 0
   m_TargetCamera: {fileID: 0}
@@ -930,7 +930,7 @@ VideoPlayer:
   m_EnabledAudioTracks: 
   m_DirectAudioMutes: 
   m_ControlledAudioTrackCount: 0
-  m_PlayOnAwake: 0
+  m_PlayOnAwake: 1
   m_SkipOnDrop: 1
   m_Looping: 0
   m_WaitForFirstFrame: 1
@@ -1361,7 +1361,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 3163856921800314800, guid: c257f18b5741740b09d56ad93839d5d2, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 729426691}
+      addedObject: {fileID: 729426694}
   m_SourcePrefab: {fileID: 100100000, guid: c257f18b5741740b09d56ad93839d5d2, type: 3}
 --- !u!1 &2007410386
 GameObject:
@@ -1494,17 +1494,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2082680574}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 30}
+  m_LocalRotation: {x: 0, y: 0.2588191, z: 0, w: 0.9659258}
+  m_LocalPosition: {x: 0, y: 0, z: 120}
   m_LocalScale: {x: 0.02, y: 0.02, z: 0.02}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 198046154}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 30, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 5}
-  m_SizeDelta: {x: 100, y: 100}
+  m_AnchoredPosition: {x: 38, y: 10}
+  m_SizeDelta: {x: 2560, y: 1440}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2082680576
 MonoBehaviour:
