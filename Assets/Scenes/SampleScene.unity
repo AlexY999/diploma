@@ -352,7 +352,7 @@ GameObject:
   - component: {fileID: 311898632}
   - component: {fileID: 311898631}
   m_Layer: 0
-  m_Name: BarracudaRunner
+  m_Name: PoseAnalyzer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -370,20 +370,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a27889227d895094c8cd75784aa13cc2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NNModel: {fileID: 5022602860645237092, guid: 2b764c52ef22149078563ad581777af8, type: 3}
-  WorkerType: 32768
-  Verbose: 0
-  VNectModel: {fileID: 729426691}
-  streamHandler: {fileID: 2007410391}
-  InputImageSize: 448
-  HeatMapCol: 28
-  KalmanParamQ: 0.001
-  KalmanParamR: 0.0015
-  UseLowPassFilter: 1
-  LowPassParam: 0.1
-  Msg: {fileID: 722966693}
-  WaitTimeModelLoad: 1
-  InitImg: {fileID: 2800000, guid: ad05e7fc23ec7df40acf63ce37cc522f, type: 3}
+  ModelData: {fileID: 5022602860645237092, guid: 425a9680555ad488ba815c3f6cd12965, type: 3}
+  WorkerType: 256
+  DebugMode: 0
+  PoseModel: {fileID: 729426691}
+  VideoStreamHandler: {fileID: 2007410391}
+  TargetImageSize: 448
+  HeatMapColumns: 28
+  KalmanQ: 0.001
+  KalmanR: 0.0015
+  EnableSmoothing: 1
+  SmoothingFactor: 0.1
+  StatusMessage: {fileID: 722966693}
+  ModelLoadingDelay: 0.1
+  PlaceholderImage: {fileID: 2800000, guid: ad05e7fc23ec7df40acf63ce37cc522f, type: 3}
 --- !u!4 &311898632
 Transform:
   m_ObjectHideFlags: 0
@@ -1466,7 +1466,7 @@ MonoBehaviour:
   DisplayLayer:
     serializedVersion: 2
     m_Bits: 4
-  EnableWebCam: 1
+  EnableWebCam: 0
   CameraIndex: 0
   MediaPlayer: {fileID: 1508644618}
 --- !u!1 &2082680574
