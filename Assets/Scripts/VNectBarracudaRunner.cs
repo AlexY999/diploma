@@ -21,7 +21,7 @@ public class VNectBarracudaRunner : MonoBehaviour
 
     public VNectModel VNectModel;
 
-    public VideoCapture videoCapture;
+    public StreamHandler streamHandler;
 
     private Model _model;
     private IWorker _worker;
@@ -245,7 +245,7 @@ public class VNectBarracudaRunner : MonoBehaviour
         yield return new WaitForSeconds(WaitTimeModelLoad);
 
         // Init VideoCapture
-        videoCapture.Init(InputImageSize, InputImageSize);
+        streamHandler.Init(InputImageSize, InputImageSize);
         Lock = false;
         Msg.gameObject.SetActive(false);
     }
@@ -261,12 +261,12 @@ public class VNectBarracudaRunner : MonoBehaviour
 
     private void UpdateVNectModel()
     {
-        input = new Tensor(videoCapture.MainTexture);
+        input = new Tensor(streamHandler.OutputTexture);
         if (inputs[inputName_1] == null)
         {
             inputs[inputName_1] = input;
-            inputs[inputName_2] = new Tensor(videoCapture.MainTexture);
-            inputs[inputName_3] = new Tensor(videoCapture.MainTexture);
+            inputs[inputName_2] = new Tensor(streamHandler.OutputTexture);
+            inputs[inputName_3] = new Tensor(streamHandler.OutputTexture);
         }
         else
         {

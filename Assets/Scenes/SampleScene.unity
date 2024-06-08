@@ -374,7 +374,7 @@ MonoBehaviour:
   WorkerType: 32768
   Verbose: 0
   VNectModel: {fileID: 729426691}
-  videoCapture: {fileID: 2007410387}
+  streamHandler: {fileID: 2007410391}
   InputImageSize: 448
   HeatMapCol: 28
   KalmanParamQ: 0.001
@@ -412,7 +412,7 @@ GameObject:
   - component: {fileID: 318842551}
   - component: {fileID: 318842550}
   m_Layer: 0
-  m_Name: InputTexture
+  m_Name: SourceTextureObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -896,7 +896,7 @@ GameObject:
   - component: {fileID: 1508644619}
   - component: {fileID: 1508644618}
   m_Layer: 0
-  m_Name: Video Player
+  m_Name: MediaPlayer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -910,7 +910,7 @@ VideoPlayer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1508644617}
   m_Enabled: 1
-  m_VideoClip: {fileID: 32900000, guid: 15588459e6605c2489744026931a299e, type: 3}
+  m_VideoClip: {fileID: 32900000, guid: 09f5bce4d56b6472ea0cb3fd74d89cb4, type: 3}
   m_TargetCameraAlpha: 1
   m_TargetCamera3DLayout: 0
   m_TargetCamera: {fileID: 0}
@@ -1374,36 +1374,14 @@ GameObject:
   - component: {fileID: 2007410390}
   - component: {fileID: 2007410389}
   - component: {fileID: 2007410388}
-  - component: {fileID: 2007410387}
+  - component: {fileID: 2007410391}
   m_Layer: 2
-  m_Name: MainTexrure
+  m_Name: DisplayBackground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &2007410387
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2007410386}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b0015fead31b30e44a6ac6586bfda03c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  InputTexture: {fileID: 318842549}
-  VideoScreen: {fileID: 2082680576}
-  VideoBackground: {fileID: 2007410386}
-  VideoBackgroundScale: 1
-  _layer:
-    serializedVersion: 2
-    m_Bits: 4
-  UseWebCam: 0
-  WebCamIndex: 0
-  VideoPlayer: {fileID: 1508644618}
 --- !u!23 &2007410388
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1469,6 +1447,28 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2007410391
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2007410386}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0015fead31b30e44a6ac6586bfda03c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SourceTextureObject: {fileID: 318842549}
+  DisplayScreen: {fileID: 2082680576}
+  DisplayBackground: {fileID: 2007410386}
+  BackgroundScaleModifier: 1
+  DisplayLayer:
+    serializedVersion: 2
+    m_Bits: 4
+  EnableWebCam: 1
+  CameraIndex: 0
+  MediaPlayer: {fileID: 1508644618}
 --- !u!1 &2082680574
 GameObject:
   m_ObjectHideFlags: 0
@@ -1481,7 +1481,7 @@ GameObject:
   - component: {fileID: 2082680577}
   - component: {fileID: 2082680576}
   m_Layer: 0
-  m_Name: VideoScreen
+  m_Name: DisplayScreen
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
