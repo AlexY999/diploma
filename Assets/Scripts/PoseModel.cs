@@ -371,7 +371,37 @@ public class PoseModel : MonoBehaviour
             sk.Line.SetPosition(0, new Vector3(s.Position3D.x * skeletonScale + skeletonOffsetX, s.Position3D.y * skeletonScale + skeletonOffsetY, s.Position3D.z * skeletonScale + skeletonOffsetZ));
             sk.Line.SetPosition(1, new Vector3(e.Position3D.x * skeletonScale + skeletonOffsetX, e.Position3D.y * skeletonScale + skeletonOffsetY, e.Position3D.z * skeletonScale + skeletonOffsetZ));
         }
+        
+        Vector3 leftFootPosition = GetJointPosition(BodyJoint.leftToe);
+        Vector3 rightFootPosition = GetJointPosition(BodyJoint.rightToe);
+    
+        float minY = Mathf.Min(leftFootPosition.y, rightFootPosition.y);
+
+        Vector3 hipPosition = _jointPoints[BodyJoint.centerHip.Int()].BoneTransform.position;
+
+        hipPosition.y -= minY;
+
+        _jointPoints[BodyJoint.centerHip.Int()].BoneTransform.position = hipPosition;
+
     }
+    
+    public Vector3 GetJointPosition(BodyJoint joint)
+    {
+        if (_jointPoints == null)
+        {
+            Debug.LogError("Joint points are not initialized.");
+            return Vector3.zero;
+        }
+
+        int jointIndex = joint.Int();
+        if (jointIndex < 0 || jointIndex >= _jointPoints.Length)
+        {
+            Debug.LogError("Joint index is out of range.");
+            return Vector3.zero;
+        }
+        return _jointPoints[jointIndex].BoneTransform.position;
+    }
+
 
     Vector3 TriangleNormal(Vector3 a, Vector3 b, Vector3 c)
     {
