@@ -257,46 +257,26 @@ public class PoseAnalyzer : MonoBehaviour
                 }
             }
 
-            _jointPositions[j].CurrentPosition3D.x =
-                (_threeDOffsets[
-                     maxYIndex * _squaredCubeOffset + maxXIndex * _linearCubeOffset + j * heatMapColumns + maxZIndex] +
-                 0.5f + (float)maxXIndex) * _imageResizeFactor - _halfImageSize;
-            _jointPositions[j].CurrentPosition3D.y = _halfImageSize -
-                                                     (_threeDOffsets[
-                                                          maxYIndex * _squaredCubeOffset +
-                                                          maxXIndex * _linearCubeOffset +
-                                                          (j + TotalJoints) * heatMapColumns + maxZIndex] + 0.5f +
-                                                      (float)maxYIndex) * _imageResizeFactor;
-            _jointPositions[j].CurrentPosition3D.z =
-                (_threeDOffsets[
-                    maxYIndex * _squaredCubeOffset + maxXIndex * _linearCubeOffset +
-                    (j + DoubleJointCount) * heatMapColumns + maxZIndex] + 0.5f + (float)(maxZIndex - 14)) *
-                _imageResizeFactor;
+            _jointPositions[j].CurrentPosition3D.x = (_threeDOffsets[maxYIndex * _squaredCubeOffset + maxXIndex * _linearCubeOffset + j * heatMapColumns + maxZIndex] + 0.5f + (float)maxXIndex) * _imageResizeFactor - _halfImageSize;
+            _jointPositions[j].CurrentPosition3D.y = _halfImageSize - (_threeDOffsets[maxYIndex * _squaredCubeOffset + maxXIndex * _linearCubeOffset + (j + TotalJoints) * heatMapColumns + maxZIndex] + 0.5f + (float)maxYIndex) * _imageResizeFactor;
+            _jointPositions[j].CurrentPosition3D.z = (_threeDOffsets[maxYIndex * _squaredCubeOffset + maxXIndex * _linearCubeOffset + (j + DoubleJointCount) * heatMapColumns + maxZIndex] + 0.5f + (float)(maxZIndex - 14)) * _imageResizeFactor;
         }
     }
 
     private void CalculateSpecialJointPositions()
     {
-        var lc = (_jointPositions[BodyJoint.rightUpperLeg.Int()].CurrentPosition3D +
-                  _jointPositions[BodyJoint.leftUpperLeg.Int()].CurrentPosition3D) / 2f;
-        _jointPositions[BodyJoint.centerHip.Int()].CurrentPosition3D =
-            (_jointPositions[BodyJoint.upperAbdomen.Int()].CurrentPosition3D + lc) / 2f;
+        var lc = (_jointPositions[BodyJoint.rightUpperLeg.Int()].CurrentPosition3D + _jointPositions[BodyJoint.leftUpperLeg.Int()].CurrentPosition3D) / 2f;
+        _jointPositions[BodyJoint.centerHip.Int()].CurrentPosition3D = (_jointPositions[BodyJoint.upperAbdomen.Int()].CurrentPosition3D + lc) / 2f;
 
-        _jointPositions[BodyJoint.centralNeck.Int()].CurrentPosition3D =
-            (_jointPositions[BodyJoint.rightShoulder.Int()].CurrentPosition3D +
-             _jointPositions[BodyJoint.leftShoulder.Int()].CurrentPosition3D) / 2f;
+        _jointPositions[BodyJoint.centralNeck.Int()].CurrentPosition3D = (_jointPositions[BodyJoint.rightShoulder.Int()].CurrentPosition3D + _jointPositions[BodyJoint.leftShoulder.Int()].CurrentPosition3D) / 2f;
 
-        var cEar = (_jointPositions[BodyJoint.rightEar.Int()].CurrentPosition3D +
-                    _jointPositions[BodyJoint.leftEar.Int()].CurrentPosition3D) / 2f;
+        var cEar = (_jointPositions[BodyJoint.rightEar.Int()].CurrentPosition3D + _jointPositions[BodyJoint.leftEar.Int()].CurrentPosition3D) / 2f;
         var hv = cEar - _jointPositions[BodyJoint.centralNeck.Int()].CurrentPosition3D;
         var nhv = Vector3.Normalize(hv);
-        var nv = _jointPositions[BodyJoint.centralNose.Int()].CurrentPosition3D -
-                 _jointPositions[BodyJoint.centralNeck.Int()].CurrentPosition3D;
-        _jointPositions[BodyJoint.topHead.Int()].CurrentPosition3D =
-            _jointPositions[BodyJoint.centralNeck.Int()].CurrentPosition3D + nhv * Vector3.Dot(nhv, nv);
+        var nv = _jointPositions[BodyJoint.centralNose.Int()].CurrentPosition3D - _jointPositions[BodyJoint.centralNeck.Int()].CurrentPosition3D;
+        _jointPositions[BodyJoint.topHead.Int()].CurrentPosition3D = _jointPositions[BodyJoint.centralNeck.Int()].CurrentPosition3D + nhv * Vector3.Dot(nhv, nv);
 
-        _jointPositions[BodyJoint.middleSpine.Int()].CurrentPosition3D =
-            _jointPositions[BodyJoint.upperAbdomen.Int()].CurrentPosition3D;
+        _jointPositions[BodyJoint.middleSpine.Int()].CurrentPosition3D = _jointPositions[BodyJoint.upperAbdomen.Int()].CurrentPosition3D;
     }
 
     private void ApplyKalmanFilter()
@@ -311,8 +291,7 @@ public class PoseAnalyzer : MonoBehaviour
             {
                 jp.HistoricalPositions3D[0] = jp.Position3D;
                 for (var i = 1; i < jp.HistoricalPositions3D.Length; i++)
-                    jp.HistoricalPositions3D[i] = jp.HistoricalPositions3D[i] * smoothingFactor +
-                                                  jp.HistoricalPositions3D[i - 1] * (1f - smoothingFactor);
+                    jp.HistoricalPositions3D[i] = jp.HistoricalPositions3D[i] * smoothingFactor + jp.HistoricalPositions3D[i - 1] * (1f - smoothingFactor);
                 jp.Position3D = jp.HistoricalPositions3D[jp.HistoricalPositions3D.Length - 1];
             }
     }
@@ -320,31 +299,19 @@ public class PoseAnalyzer : MonoBehaviour
     private void KalmanUpdate(JointPoint measurement)
     {
         MeasurementUpdate(measurement);
-        measurement.Position3D.x = measurement.EstimatedState.x +
-                                   (measurement.CurrentPosition3D.x - measurement.EstimatedState.x) *
-                                   measurement.KalmanGain.x;
-        measurement.Position3D.y = measurement.EstimatedState.y +
-                                   (measurement.CurrentPosition3D.y - measurement.EstimatedState.y) *
-                                   measurement.KalmanGain.y;
-        measurement.Position3D.z = measurement.EstimatedState.z +
-                                   (measurement.CurrentPosition3D.z - measurement.EstimatedState.z) *
-                                   measurement.KalmanGain.z;
+        measurement.Position3D.x = measurement.EstimatedState.x + (measurement.CurrentPosition3D.x - measurement.EstimatedState.x) * measurement.KalmanGain.x;
+        measurement.Position3D.y = measurement.EstimatedState.y + (measurement.CurrentPosition3D.y - measurement.EstimatedState.y) * measurement.KalmanGain.y;
+        measurement.Position3D.z = measurement.EstimatedState.z + (measurement.CurrentPosition3D.z - measurement.EstimatedState.z) * measurement.KalmanGain.z;
         measurement.EstimatedState = measurement.Position3D;
     }
 
     private void MeasurementUpdate(JointPoint measurement)
     {
-        measurement.KalmanGain.x = (measurement.PredictionError.x + kalmanQ) /
-                                   (measurement.PredictionError.x + kalmanQ + kalmanR);
-        measurement.KalmanGain.y = (measurement.PredictionError.y + kalmanQ) /
-                                   (measurement.PredictionError.y + kalmanQ + kalmanR);
-        measurement.KalmanGain.z = (measurement.PredictionError.z + kalmanQ) /
-                                   (measurement.PredictionError.z + kalmanQ + kalmanR);
-        measurement.PredictionError.x = kalmanR * (measurement.PredictionError.x + kalmanQ) /
-                                        (kalmanR + measurement.PredictionError.x + kalmanQ);
-        measurement.PredictionError.y = kalmanR * (measurement.PredictionError.y + kalmanQ) /
-                                        (kalmanR + measurement.PredictionError.y + kalmanQ);
-        measurement.PredictionError.z = kalmanR * (measurement.PredictionError.z + kalmanQ) /
-                                        (kalmanR + measurement.PredictionError.z + kalmanQ);
+        measurement.KalmanGain.x = (measurement.PredictionError.x + kalmanQ) / (measurement.PredictionError.x + kalmanQ + kalmanR);
+        measurement.KalmanGain.y = (measurement.PredictionError.y + kalmanQ) / (measurement.PredictionError.y + kalmanQ + kalmanR);
+        measurement.KalmanGain.z = (measurement.PredictionError.z + kalmanQ) / (measurement.PredictionError.z + kalmanQ + kalmanR);
+        measurement.PredictionError.x = kalmanR * (measurement.PredictionError.x + kalmanQ) / (kalmanR + measurement.PredictionError.x + kalmanQ);
+        measurement.PredictionError.y = kalmanR * (measurement.PredictionError.y + kalmanQ) / (kalmanR + measurement.PredictionError.y + kalmanQ);
+        measurement.PredictionError.z = kalmanR * (measurement.PredictionError.z + kalmanQ) / (kalmanR + measurement.PredictionError.z + kalmanQ);
     }
 }

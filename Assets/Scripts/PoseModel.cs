@@ -54,63 +54,43 @@ public class PoseModel : MonoBehaviour
         _avatarAnimator = avatarObject.GetComponent<Animator>();
 
         // Right Arm
-        _jointPoints[BodyJoint.rightShoulder.Int()].BoneTransform =
-            _avatarAnimator.GetBoneTransform(HumanBodyBones.RightUpperArm);
-        _jointPoints[BodyJoint.rightElbow.Int()].BoneTransform =
-            _avatarAnimator.GetBoneTransform(HumanBodyBones.RightLowerArm);
-        _jointPoints[BodyJoint.rightHand.Int()].BoneTransform =
-            _avatarAnimator.GetBoneTransform(HumanBodyBones.RightHand);
-        _jointPoints[BodyJoint.rightThumb.Int()].BoneTransform =
-            _avatarAnimator.GetBoneTransform(HumanBodyBones.RightThumbIntermediate);
-        _jointPoints[BodyJoint.rightFinger.Int()].BoneTransform =
-            _avatarAnimator.GetBoneTransform(HumanBodyBones.RightMiddleProximal);
+        _jointPoints[BodyJoint.rightShoulder.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.RightUpperArm);
+        _jointPoints[BodyJoint.rightElbow.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.RightLowerArm);
+        _jointPoints[BodyJoint.rightHand.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.RightHand);
+        _jointPoints[BodyJoint.rightThumb.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.RightThumbIntermediate);
+        _jointPoints[BodyJoint.rightFinger.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.RightMiddleProximal);
         // Left Arm
-        _jointPoints[BodyJoint.leftShoulder.Int()].BoneTransform =
-            _avatarAnimator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
-        _jointPoints[BodyJoint.leftElbow.Int()].BoneTransform =
-            _avatarAnimator.GetBoneTransform(HumanBodyBones.LeftLowerArm);
-        _jointPoints[BodyJoint.leftHand.Int()].BoneTransform =
-            _avatarAnimator.GetBoneTransform(HumanBodyBones.LeftHand);
-        _jointPoints[BodyJoint.leftThumb.Int()].BoneTransform =
-            _avatarAnimator.GetBoneTransform(HumanBodyBones.LeftThumbIntermediate);
-        _jointPoints[BodyJoint.leftFinger.Int()].BoneTransform =
-            _avatarAnimator.GetBoneTransform(HumanBodyBones.LeftMiddleProximal);
+        _jointPoints[BodyJoint.leftShoulder.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
+        _jointPoints[BodyJoint.leftElbow.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.LeftLowerArm);
+        _jointPoints[BodyJoint.leftHand.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.LeftHand);
+        _jointPoints[BodyJoint.leftThumb.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.LeftThumbIntermediate);
+        _jointPoints[BodyJoint.leftFinger.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.LeftMiddleProximal);
 
         // Face
         _jointPoints[BodyJoint.leftEar.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.Head);
         _jointPoints[BodyJoint.leftEye.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.LeftEye);
         _jointPoints[BodyJoint.rightEar.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.Head);
-        _jointPoints[BodyJoint.rightEye.Int()].BoneTransform =
-            _avatarAnimator.GetBoneTransform(HumanBodyBones.RightEye);
+        _jointPoints[BodyJoint.rightEye.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.RightEye);
         _jointPoints[BodyJoint.centralNose.Int()].BoneTransform = avatarNose.transform;
 
         // Right Leg
-        _jointPoints[BodyJoint.rightUpperLeg.Int()].BoneTransform =
-            _avatarAnimator.GetBoneTransform(HumanBodyBones.RightUpperLeg);
-        _jointPoints[BodyJoint.rightLowerLeg.Int()].BoneTransform =
-            _avatarAnimator.GetBoneTransform(HumanBodyBones.RightLowerLeg);
-        _jointPoints[BodyJoint.rightFoot.Int()].BoneTransform =
-            _avatarAnimator.GetBoneTransform(HumanBodyBones.RightFoot);
-        _jointPoints[BodyJoint.rightToe.Int()].BoneTransform =
-            _avatarAnimator.GetBoneTransform(HumanBodyBones.RightToes);
+        _jointPoints[BodyJoint.rightUpperLeg.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.RightUpperLeg);
+        _jointPoints[BodyJoint.rightLowerLeg.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.RightLowerLeg);
+        _jointPoints[BodyJoint.rightFoot.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.RightFoot);
+        _jointPoints[BodyJoint.rightToe.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.RightToes);
 
         // Left Leg
-        _jointPoints[BodyJoint.leftUpperLeg.Int()].BoneTransform =
-            _avatarAnimator.GetBoneTransform(HumanBodyBones.LeftUpperLeg);
-        _jointPoints[BodyJoint.leftLowerLeg.Int()].BoneTransform =
-            _avatarAnimator.GetBoneTransform(HumanBodyBones.LeftLowerLeg);
-        _jointPoints[BodyJoint.leftFoot.Int()].BoneTransform =
-            _avatarAnimator.GetBoneTransform(HumanBodyBones.LeftFoot);
+        _jointPoints[BodyJoint.leftUpperLeg.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.LeftUpperLeg);
+        _jointPoints[BodyJoint.leftLowerLeg.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.LeftLowerLeg);
+        _jointPoints[BodyJoint.leftFoot.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.LeftFoot);
         _jointPoints[BodyJoint.leftToe.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.LeftToes);
 
         // etc
-        _jointPoints[BodyJoint.upperAbdomen.Int()].BoneTransform =
-            _avatarAnimator.GetBoneTransform(HumanBodyBones.Spine);
+        _jointPoints[BodyJoint.upperAbdomen.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.Spine);
         _jointPoints[BodyJoint.centerHip.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.Hips);
         _jointPoints[BodyJoint.topHead.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.Head);
         _jointPoints[BodyJoint.centralNeck.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.Neck);
-        _jointPoints[BodyJoint.middleSpine.Int()].BoneTransform =
-            _avatarAnimator.GetBoneTransform(HumanBodyBones.Spine);
+        _jointPoints[BodyJoint.middleSpine.Int()].BoneTransform = _avatarAnimator.GetBoneTransform(HumanBodyBones.Spine);
 
         // Child Settings
         // Right Arm
@@ -146,7 +126,8 @@ public class PoseModel : MonoBehaviour
     private void SetupInitialRotations()
     {
         // Set Inverse
-        var forward = TriangleNormal(_jointPoints[BodyJoint.centerHip.Int()].BoneTransform.position,
+        var forward = TriangleNormal(
+            _jointPoints[BodyJoint.centerHip.Int()].BoneTransform.position, 
             _jointPoints[BodyJoint.leftUpperLeg.Int()].BoneTransform.position,
             _jointPoints[BodyJoint.rightUpperLeg.Int()].BoneTransform.position);
         foreach (var jointPoint in _jointPoints)
@@ -168,27 +149,20 @@ public class PoseModel : MonoBehaviour
         // For Head Rotation
         var head = _jointPoints[BodyJoint.topHead.Int()];
         head.InitialRotation = _jointPoints[BodyJoint.topHead.Int()].BoneTransform.rotation;
-        var gaze = _jointPoints[BodyJoint.centralNose.Int()].BoneTransform.position -
-                   _jointPoints[BodyJoint.topHead.Int()].BoneTransform.position;
+        var gaze = _jointPoints[BodyJoint.centralNose.Int()].BoneTransform.position - _jointPoints[BodyJoint.topHead.Int()].BoneTransform.position;
         head.RotationInverse = Quaternion.Inverse(Quaternion.LookRotation(gaze));
         head.ComputedRotation = head.RotationInverse * head.InitialRotation;
 
         var lHand = _jointPoints[BodyJoint.leftHand.Int()];
-        var lf = TriangleNormal(lHand.Position3D, _jointPoints[BodyJoint.leftFinger.Int()].Position3D,
-            _jointPoints[BodyJoint.leftThumb.Int()].Position3D);
+        var lf = TriangleNormal(lHand.Position3D, _jointPoints[BodyJoint.leftFinger.Int()].Position3D, _jointPoints[BodyJoint.leftThumb.Int()].Position3D);
         lHand.InitialRotation = lHand.BoneTransform.rotation;
-        lHand.RotationInverse = Quaternion.Inverse(Quaternion.LookRotation(
-            _jointPoints[BodyJoint.leftThumb.Int()].BoneTransform.position -
-            _jointPoints[BodyJoint.leftFinger.Int()].BoneTransform.position, lf));
+        lHand.RotationInverse = Quaternion.Inverse(Quaternion.LookRotation(_jointPoints[BodyJoint.leftThumb.Int()].BoneTransform.position - _jointPoints[BodyJoint.leftFinger.Int()].BoneTransform.position, lf));
         lHand.ComputedRotation = lHand.RotationInverse * lHand.InitialRotation;
 
         var rHand = _jointPoints[BodyJoint.rightHand.Int()];
-        var rf = TriangleNormal(rHand.Position3D, _jointPoints[BodyJoint.rightThumb.Int()].Position3D,
-            _jointPoints[BodyJoint.rightFinger.Int()].Position3D);
+        var rf = TriangleNormal(rHand.Position3D, _jointPoints[BodyJoint.rightThumb.Int()].Position3D, _jointPoints[BodyJoint.rightFinger.Int()].Position3D);
         rHand.InitialRotation = _jointPoints[BodyJoint.rightHand.Int()].BoneTransform.rotation;
-        rHand.RotationInverse = Quaternion.Inverse(Quaternion.LookRotation(
-            _jointPoints[BodyJoint.rightThumb.Int()].BoneTransform.position -
-            _jointPoints[BodyJoint.rightFinger.Int()].BoneTransform.position, rf));
+        rHand.RotationInverse = Quaternion.Inverse(Quaternion.LookRotation(_jointPoints[BodyJoint.rightThumb.Int()].BoneTransform.position - _jointPoints[BodyJoint.rightFinger.Int()].BoneTransform.position, rf));
         rHand.ComputedRotation = rHand.RotationInverse * rHand.InitialRotation;
     }
 
@@ -210,91 +184,90 @@ public class PoseModel : MonoBehaviour
         _skeletonBuilder.UpdateBoneLines();
     }
 
-    private void CalculateAndSmoothCharacterHeight()
-    {
-        // caliculate movement range of z-coordinate from height
-        var t1 = Vector3.Distance(_jointPoints[BodyJoint.topHead.Int()].Position3D,
-            _jointPoints[BodyJoint.centralNeck.Int()].Position3D);
-        var t2 = Vector3.Distance(_jointPoints[BodyJoint.centralNeck.Int()].Position3D,
-            _jointPoints[BodyJoint.middleSpine.Int()].Position3D);
-        var pm = (_jointPoints[BodyJoint.rightUpperLeg.Int()].Position3D +
-                  _jointPoints[BodyJoint.leftUpperLeg.Int()].Position3D) / 2f;
-        var t3 = Vector3.Distance(_jointPoints[BodyJoint.middleSpine.Int()].Position3D, pm);
-        var t4r = Vector3.Distance(_jointPoints[BodyJoint.rightUpperLeg.Int()].Position3D,
-            _jointPoints[BodyJoint.rightLowerLeg.Int()].Position3D);
-        var t4l = Vector3.Distance(_jointPoints[BodyJoint.leftUpperLeg.Int()].Position3D,
-            _jointPoints[BodyJoint.leftLowerLeg.Int()].Position3D);
-        var t4 = (t4r + t4l) / 2f;
-        var t5r = Vector3.Distance(_jointPoints[BodyJoint.rightLowerLeg.Int()].Position3D,
-            _jointPoints[BodyJoint.rightFoot.Int()].Position3D);
-        var t5l = Vector3.Distance(_jointPoints[BodyJoint.leftLowerLeg.Int()].Position3D,
-            _jointPoints[BodyJoint.leftFoot.Int()].Position3D);
-        var t5 = (t5r + t5l) / 2f;
-        var characterHeight = t1 + t2 + t3 + t4 + t5;
+private void CalculateAndSmoothCharacterHeight()
+{
+    // Calculate distances between joint points for a more accurate character height measurement
+    var headToNeckDistance = Vector3.Distance(
+        _jointPoints[BodyJoint.topHead.Int()].Position3D,
+        _jointPoints[BodyJoint.centralNeck.Int()].Position3D);
+    var neckToSpineDistance = Vector3.Distance(
+        _jointPoints[BodyJoint.centralNeck.Int()].Position3D,
+        _jointPoints[BodyJoint.middleSpine.Int()].Position3D);
+    var pelvisMidpoint = (_jointPoints[BodyJoint.rightUpperLeg.Int()].Position3D + _jointPoints[BodyJoint.leftUpperLeg.Int()].Position3D) / 2f;
+    var spineToPelvisDistance = Vector3.Distance(_jointPoints[BodyJoint.middleSpine.Int()].Position3D, pelvisMidpoint);
+    var rightUpperToLowerLegDistance = Vector3.Distance(
+        _jointPoints[BodyJoint.rightUpperLeg.Int()].Position3D,
+        _jointPoints[BodyJoint.rightLowerLeg.Int()].Position3D);
+    var leftUpperToLowerLegDistance = Vector3.Distance(
+        _jointPoints[BodyJoint.leftUpperLeg.Int()].Position3D,
+        _jointPoints[BodyJoint.leftLowerLeg.Int()].Position3D);
+    var averageLegLength = (rightUpperToLowerLegDistance + leftUpperToLowerLegDistance) / 2f;
+    var rightLowerLegToFootDistance = Vector3.Distance(
+        _jointPoints[BodyJoint.rightLowerLeg.Int()].Position3D,
+        _jointPoints[BodyJoint.rightFoot.Int()].Position3D);
+    var leftLowerLegToFootDistance = Vector3.Distance(
+        _jointPoints[BodyJoint.leftLowerLeg.Int()].Position3D,
+        _jointPoints[BodyJoint.leftFoot.Int()].Position3D);
+    var averageFootHeight = (rightLowerLegToFootDistance + leftLowerLegToFootDistance) / 2f;
+    var characterHeight = headToNeckDistance + neckToSpineDistance + spineToPelvisDistance + averageLegLength + averageFootHeight;
 
-        // Low pass filter in z direction
-        _currentHeight = characterHeight * 0.7f + _previousHeight * 0.3f;
-        _previousHeight = _currentHeight;
+    // Apply a low pass filter to smooth character height variations
+    _currentHeight = characterHeight * 0.7f + _previousHeight * 0.3f;
+    _previousHeight = _currentHeight;
 
-        if (_currentHeight == 0) _currentHeight = BaseHeight;
-    }
+    // Ensure the character height does not drop to zero
+    if (_currentHeight == 0) _currentHeight = BaseHeight;
+}
+
 
     private void RotateBones()
     {
         var dz = (BaseHeight - _currentHeight) / BaseHeight * zVerticalScale;
 
         // movement and rotatation of center
-        var forward = TriangleNormal(_jointPoints[BodyJoint.centerHip.Int()].Position3D,
+        var forward = TriangleNormal(
+            _jointPoints[BodyJoint.centerHip.Int()].Position3D,
             _jointPoints[BodyJoint.leftUpperLeg.Int()].Position3D,
             _jointPoints[BodyJoint.rightUpperLeg.Int()].Position3D);
-        _jointPoints[BodyJoint.centerHip.Int()].BoneTransform.position =
-            _jointPoints[BodyJoint.centerHip.Int()].Position3D * 0.005f +
-            new Vector3(_initPosition.x, _initPosition.y, _initPosition.z + dz);
-        _jointPoints[BodyJoint.centerHip.Int()].BoneTransform.rotation = Quaternion.LookRotation(forward) *
-                                                                         _jointPoints[BodyJoint.centerHip.Int()]
-                                                                             .ComputedRotation;
+        _jointPoints[BodyJoint.centerHip.Int()].BoneTransform.position = _jointPoints[BodyJoint.centerHip.Int()].Position3D * 0.005f + new Vector3(_initPosition.x, _initPosition.y, _initPosition.z + dz);
+        _jointPoints[BodyJoint.centerHip.Int()].BoneTransform.rotation = Quaternion.LookRotation(forward) * _jointPoints[BodyJoint.centerHip.Int()].ComputedRotation;
 
         // rotate each of bones
         foreach (var jointPoint in _jointPoints)
             if (jointPoint.ParentJoint != null)
             {
                 var fv = jointPoint.ParentJoint.Position3D - jointPoint.Position3D;
-                jointPoint.BoneTransform.rotation =
-                    Quaternion.LookRotation(jointPoint.Position3D - jointPoint.ChildJoint.Position3D, fv) *
-                    jointPoint.ComputedRotation;
+                jointPoint.BoneTransform.rotation = Quaternion.LookRotation(jointPoint.Position3D - jointPoint.ChildJoint.Position3D, fv) * jointPoint.ComputedRotation;
             }
             else if (jointPoint.ChildJoint != null)
             {
-                jointPoint.BoneTransform.rotation =
-                    Quaternion.LookRotation(jointPoint.Position3D - jointPoint.ChildJoint.Position3D, forward) *
-                    jointPoint.ComputedRotation;
+                jointPoint.BoneTransform.rotation = Quaternion.LookRotation(jointPoint.Position3D - jointPoint.ChildJoint.Position3D, forward) * jointPoint.ComputedRotation;
             }
 
         // Head Rotation
-        var gaze = _jointPoints[BodyJoint.centralNose.Int()].Position3D -
-                   _jointPoints[BodyJoint.topHead.Int()].Position3D;
-        var f = TriangleNormal(_jointPoints[BodyJoint.centralNose.Int()].Position3D,
-            _jointPoints[BodyJoint.rightEar.Int()].Position3D, _jointPoints[BodyJoint.leftEar.Int()].Position3D);
+        var gaze = _jointPoints[BodyJoint.centralNose.Int()].Position3D - _jointPoints[BodyJoint.topHead.Int()].Position3D;
+        var f = TriangleNormal(
+            _jointPoints[BodyJoint.centralNose.Int()].Position3D,
+            _jointPoints[BodyJoint.rightEar.Int()].Position3D, 
+            _jointPoints[BodyJoint.leftEar.Int()].Position3D);
         var head = _jointPoints[BodyJoint.topHead.Int()];
         head.BoneTransform.rotation = Quaternion.LookRotation(gaze, f) * head.ComputedRotation;
 
         // Wrist rotation (Test code)
         var lHand = _jointPoints[BodyJoint.leftHand.Int()];
-        var lf = TriangleNormal(lHand.Position3D, _jointPoints[BodyJoint.leftFinger.Int()].Position3D,
+        var lf = TriangleNormal(
+            lHand.Position3D, 
+            _jointPoints[BodyJoint.leftFinger.Int()].Position3D,
             _jointPoints[BodyJoint.leftThumb.Int()].Position3D);
-        lHand.BoneTransform.rotation =
-            Quaternion.LookRotation(
-                _jointPoints[BodyJoint.leftThumb.Int()].Position3D -
-                _jointPoints[BodyJoint.leftFinger.Int()].Position3D, lf) * lHand.ComputedRotation;
+        lHand.BoneTransform.rotation = Quaternion.LookRotation(_jointPoints[BodyJoint.leftThumb.Int()].Position3D - _jointPoints[BodyJoint.leftFinger.Int()].Position3D, lf) * lHand.ComputedRotation;
 
         var rHand = _jointPoints[BodyJoint.rightHand.Int()];
-        var rf = TriangleNormal(rHand.Position3D, _jointPoints[BodyJoint.rightThumb.Int()].Position3D,
+        var rf = TriangleNormal(
+            rHand.Position3D, 
+            _jointPoints[BodyJoint.rightThumb.Int()].Position3D,
             _jointPoints[BodyJoint.rightFinger.Int()].Position3D);
         //rHand.Transform.rotation = Quaternion.LookRotation(jointPoints[PositionIndex.rThumb2.Int()].Pos3D - jointPoints[PositionIndex.rMid1.Int()].Pos3D, rf) * rHand.InverseRotation;
-        rHand.BoneTransform.rotation =
-            Quaternion.LookRotation(
-                _jointPoints[BodyJoint.rightThumb.Int()].Position3D -
-                _jointPoints[BodyJoint.rightFinger.Int()].Position3D, rf) * rHand.ComputedRotation;
+        rHand.BoneTransform.rotation = Quaternion.LookRotation(_jointPoints[BodyJoint.rightThumb.Int()].Position3D - _jointPoints[BodyJoint.rightFinger.Int()].Position3D, rf) * rHand.ComputedRotation;
     }
 
     public void PositionHipsRelativeToFeet()

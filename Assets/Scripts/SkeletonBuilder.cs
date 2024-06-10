@@ -88,11 +88,13 @@ public class SkeletonBuilder : MonoBehaviour
                 var s = sk.StartJoint;
                 var e = sk.EndJoint;
 
-                sk.Line.SetPosition(0,
+                sk.Line.SetPosition(
+                    0, 
                     new Vector3(s.Position3D.x * skeletonScale + skeletonOffsetX,
                         s.Position3D.y * skeletonScale + skeletonOffsetY,
                         s.Position3D.z * skeletonScale + skeletonOffsetZ));
-                sk.Line.SetPosition(1,
+                sk.Line.SetPosition(
+                    1,
                     new Vector3(e.Position3D.x * skeletonScale + skeletonOffsetX,
                         e.Position3D.y * skeletonScale + skeletonOffsetY,
                         e.Position3D.z * skeletonScale + skeletonOffsetZ));
@@ -100,8 +102,7 @@ public class SkeletonBuilder : MonoBehaviour
         }
     }
 
-    private void AddSkeletonLine(JointPoint[] _jointPoints, BodyJoint startBodyJoint, BodyJoint endBodyJoint,
-        GameObject parentObject)
+    private void AddSkeletonLine(JointPoint[] _jointPoints, BodyJoint startBodyJoint, BodyJoint endBodyJoint, GameObject parentObject)
     {
         var lineObject = new GameObject("Line");
         lineObject.transform.SetParent(parentObject.transform);
