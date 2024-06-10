@@ -196,7 +196,7 @@ private void CalculateAndSmoothCharacterHeight()
     var pelvisMidpoint = (_jointPoints[BodyJoint.rightUpperLeg.Int()].Position3D + _jointPoints[BodyJoint.leftUpperLeg.Int()].Position3D) / 2f;
     var spineToPelvisDistance = Vector3.Distance(_jointPoints[BodyJoint.middleSpine.Int()].Position3D, pelvisMidpoint);
     var rightUpperToLowerLegDistance = Vector3.Distance(
-        _jointPoints[BodyJoint.rightUpperLeg.Int()].Position3D,
+        _jointPoints[BodyJoint.rightUpperLeg.Int()].Position3D, 
         _jointPoints[BodyJoint.rightLowerLeg.Int()].Position3D);
     var leftUpperToLowerLegDistance = Vector3.Distance(
         _jointPoints[BodyJoint.leftUpperLeg.Int()].Position3D,

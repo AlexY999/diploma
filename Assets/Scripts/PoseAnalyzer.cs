@@ -47,8 +47,7 @@ public class PoseAnalyzer : MonoBehaviour
 
     private const int DoubleJointCount = TotalJoints * 2;
     private const int TripleJointCount = TotalJoints * 3;
-
-
+    
     private int _heatMapJointProduct;
     private int _linearCubeOffset;
     private int _squaredCubeOffset;
@@ -62,9 +61,9 @@ public class PoseAnalyzer : MonoBehaviour
     public float smoothingFactor;
 
     public Text statusMessage;
-    public float modelLoadingDelay = 10f;
-    private float _loadingCountdown = 0;
+    public float modelLoadingDelay = 0.1f;
     public Texture2D placeholderImage;
+    
     private float _averagePerformanceScore = 0.0f;
     private int _updateCycleCount = 0;
     private float _totalProcessingTime = 0.0f; // Загальний час обробки усіх кадрів
