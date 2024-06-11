@@ -63,13 +63,26 @@ public class PoseAnalyzer : MonoBehaviour
     public Text statusMessage;
     public float modelLoadingDelay = 0.1f;
     public Texture2D placeholderImage;
+
+    public RawImage leftWarning;
+    public RawImage rightWarning;
+    public RawImage topWarning;
+    public RawImage bottomWarning;
     
+    private float targetAlphaTop;
+    private float targetAlphaBottom;
+    private float targetAlphaLeft;
+    private float targetAlphaRight;
+    
+    private float fadeDuration = 0.2f;
+
     private float _averagePerformanceScore = 0.0f;
     private int _updateCycleCount = 0;
     private float _totalProcessingTime = 0.0f; // Загальний час обробки усіх кадрів
     private int _processedFrames = 0; // Кількість оброблених кадрів
     private readonly Stopwatch _processingTimer = new(); // Таймер для вимірювання часу обробки
-
+    private float _averageConfidence3D = 0f;
+    
     private void Start()
     {
         _heatMapColumnsSquared = heatMapColumns * heatMapColumns;
@@ -102,13 +115,15 @@ public class PoseAnalyzer : MonoBehaviour
             _processingTimer.Reset(); // Скидання таймера
             _processingTimer.Start(); // Запуск таймера перед обробкою кадру
 
-            UpdateVNectModel();
-
+            UpdateModel();
+            UpdateVisibilityWarnings();
+            
             var totalScore = 0.0f;
 
             for (var j = 0; j < TotalJoints; j++) totalScore += _jointPositions[j].Confidence3D;
-
+            
             var averageScore = totalScore / TotalJoints;
+            _averageConfidence3D = averageScore;
             _averagePerformanceScore += averageScore;
             _updateCycleCount++;
 
@@ -150,7 +165,7 @@ public class PoseAnalyzer : MonoBehaviour
         // Release outputs
         for (var i = 2; i < b_outputs.Length; i++) b_outputs[i].Dispose();
 
-        // Init VNect model
+        // Init model
         _jointPositions = poseModel.Init();
 
         PredictPose();
@@ -173,7 +188,7 @@ public class PoseAnalyzer : MonoBehaviour
     private const string inputName_3 = "2";
     */
 
-    private void UpdateVNectModel()
+    private void UpdateModel()
     {
         input = new Tensor(videoStreamHandler.OutputTexture);
         if (inputs[inputName_1] == null)
@@ -312,5 +327,60 @@ public class PoseAnalyzer : MonoBehaviour
         measurement.PredictionError.x = kalmanR * (measurement.PredictionError.x + kalmanQ) / (kalmanR + measurement.PredictionError.x + kalmanQ);
         measurement.PredictionError.y = kalmanR * (measurement.PredictionError.y + kalmanQ) / (kalmanR + measurement.PredictionError.y + kalmanQ);
         measurement.PredictionError.z = kalmanR * (measurement.PredictionError.z + kalmanQ) / (kalmanR + measurement.PredictionError.z + kalmanQ);
+    }
+    
+    public void UpdateVisibilityWarnings()
+    {
+        float visibilityThreshold = 0.5f;
+
+        float upperBodyConfidence = CalculateAverageConfidence(
+            BodyJoint.topHead, BodyJoint.centralNeck, BodyJoint.upperAbdomen,
+            BodyJoint.rightShoulder, BodyJoint.leftShoulder);
+
+        float lowerBodyConfidence = CalculateAverageConfidence(
+            BodyJoint.rightUpperLeg, BodyJoint.leftUpperLeg,
+            BodyJoint.rightLowerLeg, BodyJoint.leftLowerLeg,
+            BodyJoint.rightFoot, BodyJoint.leftFoot,
+            BodyJoint.rightToe, BodyJoint.leftToe);
+
+        float leftSideConfidence = CalculateAverageConfidence(
+            BodyJoint.leftShoulder, BodyJoint.leftElbow, BodyJoint.leftHand,
+            BodyJoint.leftThumb, BodyJoint.leftFinger,
+            BodyJoint.leftUpperLeg, BodyJoint.leftLowerLeg,
+            BodyJoint.leftFoot, BodyJoint.leftToe);
+
+        float rightSideConfidence = CalculateAverageConfidence(
+            BodyJoint.rightShoulder, BodyJoint.rightElbow, BodyJoint.rightHand,
+            BodyJoint.rightThumb, BodyJoint.rightFinger,
+            BodyJoint.rightUpperLeg, BodyJoint.rightLowerLeg,
+            BodyJoint.rightFoot, BodyJoint.rightToe);
+
+        targetAlphaTop = upperBodyConfidence > visibilityThreshold ? 0 : 1 - (upperBodyConfidence / visibilityThreshold);
+        targetAlphaBottom = lowerBodyConfidence > visibilityThreshold ? 0 : 1 - (lowerBodyConfidence / visibilityThreshold);
+        targetAlphaLeft = leftSideConfidence > visibilityThreshold ? 0 : 1 - (leftSideConfidence / visibilityThreshold);
+        targetAlphaRight = rightSideConfidence > visibilityThreshold ? 0 : 1 - (rightSideConfidence / visibilityThreshold);
+
+        topWarning.color = new Color(topWarning.color.r, topWarning.color.g, topWarning.color.b, Mathf.Lerp(topWarning.color.a, targetAlphaTop, Time.deltaTime / fadeDuration));
+        bottomWarning.color = new Color(bottomWarning.color.r, bottomWarning.color.g, bottomWarning.color.b, Mathf.Lerp(bottomWarning.color.a, targetAlphaBottom, Time.deltaTime / fadeDuration));
+        leftWarning.color = new Color(leftWarning.color.r, leftWarning.color.g, leftWarning.color.b, Mathf.Lerp(leftWarning.color.a, targetAlphaLeft, Time.deltaTime / fadeDuration));
+        rightWarning.color = new Color(rightWarning.color.r, rightWarning.color.g, rightWarning.color.b, Mathf.Lerp(rightWarning.color.a, targetAlphaRight, Time.deltaTime / fadeDuration));
+    }
+
+    private float CalculateAverageConfidence(params BodyJoint[] joints)
+    {
+        float sumConfidence = 0f;
+        int count = 0;
+
+        foreach (var joint in joints)
+        {
+            int index = joint.Int();
+            if (index >= 0 && index < _jointPositions.Length)
+            {
+                sumConfidence += _jointPositions[index].Confidence3D;
+                count++;
+            }
+        }
+
+        return count > 0 ? sumConfidence / count : 0f;
     }
 }
