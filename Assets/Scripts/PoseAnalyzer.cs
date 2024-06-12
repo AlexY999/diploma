@@ -3,17 +3,12 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Unity.Barracuda;
 using Debug = UnityEngine.Debug;
 
-/// <summary>
-/// Define Joint points
-/// </summary>
 public class PoseAnalyzer : MonoBehaviour
 {
-    /// <summary>
-    /// Neural network model
-    /// </summary>
     public NNModel modelData;
 
     public WorkerFactory.Type workerType = WorkerFactory.Type.Auto;
@@ -24,16 +19,16 @@ public class PoseAnalyzer : MonoBehaviour
 
     private Model _poseModel;
     private IWorker _poseWorker;
-    private PoseModel.JointPoint[] _jointPositions;
+    private JointPoint[] _jointPositions;
 
     private const int TotalJoints = 24;
-    
+
     public int targetImageSize;
     private float _halfImageSize;
 
     public int heatMapColumns;
     private float _imageSizeFloat;
-    
+
     private int _heatMapColumnsSquared;
     private int _heatMapColumnsCubed;
     private float _imageResizeFactor;
@@ -46,30 +41,42 @@ public class PoseAnalyzer : MonoBehaviour
 
     private const int DoubleJointCount = TotalJoints * 2;
     private const int TripleJointCount = TotalJoints * 3;
-
-
+    
     private int _heatMapJointProduct;
     private int _linearCubeOffset;
     private int _squaredCubeOffset;
-    
+
     public float kalmanQ;
     public float kalmanR;
-    
+
     private bool _updateLock = true;
 
     public bool enableSmoothing;
     public float smoothingFactor;
 
     public Text statusMessage;
-    public float modelLoadingDelay = 10f;
-    private float _loadingCountdown = 0;
+    public float modelLoadingDelay = 0.1f;
     public Texture2D placeholderImage;
+
+    public RawImage leftWarning;
+    public RawImage rightWarning;
+    public RawImage topWarning;
+    public RawImage bottomWarning;
+    
+    private float targetAlphaTop;
+    private float targetAlphaBottom;
+    private float targetAlphaLeft;
+    private float targetAlphaRight;
+    
+    private float fadeDuration = 0.2f;
+
     private float _averagePerformanceScore = 0.0f;
     private int _updateCycleCount = 0;
     private float _totalProcessingTime = 0.0f; // Загальний час обробки усіх кадрів
     private int _processedFrames = 0; // Кількість оброблених кадрів
-    private readonly Stopwatch _processingTimer = new Stopwatch(); // Таймер для вимірювання часу обробки
-
+    private readonly Stopwatch _processingTimer = new(); // Таймер для вимірювання часу обробки
+    private float _averageConfidence3D = 0f;
+    
     private void Start()
     {
         _heatMapColumnsSquared = heatMapColumns * heatMapColumns;
@@ -102,21 +109,21 @@ public class PoseAnalyzer : MonoBehaviour
             _processingTimer.Reset(); // Скидання таймера
             _processingTimer.Start(); // Запуск таймера перед обробкою кадру
 
-            UpdateVNectModel();
-        
-            float totalScore = 0.0f;
+            UpdateModel();
+            UpdateVisibilityWarnings();
+            
+            var totalScore = 0.0f;
 
-            for (int j = 0; j < TotalJoints; j++)
-            {
-                totalScore += _jointPositions[j].Confidence3D;
-            }
-
-            float averageScore = totalScore / TotalJoints; 
-            _averagePerformanceScore += averageScore; 
+            for (var j = 0; j < TotalJoints; j++) totalScore += _jointPositions[j].Confidence3D;
+            
+            var averageScore = totalScore / TotalJoints;
+            _averageConfidence3D = averageScore;
+            _averagePerformanceScore += averageScore;
             _updateCycleCount++;
 
             _processingTimer.Stop(); // Зупинка таймера після обробки кадру
-            float frameTime = (float)_processingTimer.Elapsed.TotalMilliseconds; // Час обробки одного кадру в мілісекундах
+            var frameTime =
+                (float)_processingTimer.Elapsed.TotalMilliseconds; // Час обробки одного кадру в мілісекундах
             _totalProcessingTime += frameTime; // Додавання часу кадру до загального часу
             _processedFrames++; // Збільшення лічильника кадрів
 
@@ -126,13 +133,13 @@ public class PoseAnalyzer : MonoBehaviour
 
         if (_updateCycleCount > 0)
         {
-            float cumulativeAverageScore = _averagePerformanceScore / _updateCycleCount;
-            float averageFrameTime = _totalProcessingTime / _processedFrames; // Середній час обробки кадру
+            var cumulativeAverageScore = _averagePerformanceScore / _updateCycleCount;
+            var averageFrameTime = _totalProcessingTime / _processedFrames; // Середній час обробки кадру
             // Debug.Log("Средний score3D за все время: " + cumulativeAverageScore);
             // Debug.Log("Середній час обробки кадру: " + averageFrameTime + " ms");
         }
     }
-    
+
     private IEnumerator WaitForModelLoad()
     {
         inputs[inputName_1] = new Tensor(placeholderImage);
@@ -143,22 +150,16 @@ public class PoseAnalyzer : MonoBehaviour
         yield return _poseWorker.StartManualSchedule(inputs);
 
         // Get outputs
-        for (var i = 2; i < _poseModel.outputs.Count; i++)
-        {
-            b_outputs[i] = _poseWorker.PeekOutput(_poseModel.outputs[i]);
-        }
+        for (var i = 2; i < _poseModel.outputs.Count; i++) b_outputs[i] = _poseWorker.PeekOutput(_poseModel.outputs[i]);
 
         // Get data from outputs
         _threeDOffsets = b_outputs[2].data.Download(b_outputs[2].shape);
         _threeDHeatMap = b_outputs[3].data.Download(b_outputs[3].shape);
 
         // Release outputs
-        for (var i = 2; i < b_outputs.Length; i++)
-        {
-            b_outputs[i].Dispose();
-        }
+        for (var i = 2; i < b_outputs.Length; i++) b_outputs[i].Dispose();
 
-        // Init VNect model
+        // Init model
         _jointPositions = poseModel.Init();
 
         PredictPose();
@@ -173,6 +174,7 @@ public class PoseAnalyzer : MonoBehaviour
 
     private const string inputName_1 = "input.1";
     private const string inputName_2 = "input.4";
+
     private const string inputName_3 = "input.7";
     /*
     private const string inputName_1 = "0";
@@ -180,7 +182,7 @@ public class PoseAnalyzer : MonoBehaviour
     private const string inputName_3 = "2";
     */
 
-    private void UpdateVNectModel()
+    private void UpdateModel()
     {
         input = new Tensor(videoStreamHandler.OutputTexture);
         if (inputs[inputName_1] == null)
@@ -200,10 +202,13 @@ public class PoseAnalyzer : MonoBehaviour
 
         StartCoroutine(ExecuteModelAsync());
     }
-    
-    Tensor input = new Tensor();
-    Dictionary<string, Tensor> inputs = new Dictionary<string, Tensor>() { { inputName_1, null }, { inputName_2, null }, { inputName_3, null }, };
-    Tensor[] b_outputs = new Tensor[4];
+
+    private Tensor input = new();
+
+    private Dictionary<string, Tensor> inputs = new()
+        { { inputName_1, null }, { inputName_2, null }, { inputName_3, null } };
+
+    private Tensor[] b_outputs = new Tensor[4];
 
     private IEnumerator ExecuteModelAsync()
     {
@@ -211,24 +216,18 @@ public class PoseAnalyzer : MonoBehaviour
         yield return _poseWorker.StartManualSchedule(inputs);
 
         // Get outputs
-        for (var i = 2; i < _poseModel.outputs.Count; i++)
-        {
-            b_outputs[i] = _poseWorker.PeekOutput(_poseModel.outputs[i]);
-        }
+        for (var i = 2; i < _poseModel.outputs.Count; i++) b_outputs[i] = _poseWorker.PeekOutput(_poseModel.outputs[i]);
 
         // Get data from outputs
         _threeDOffsets = b_outputs[2].data.Download(b_outputs[2].shape);
         _threeDHeatMap = b_outputs[3].data.Download(b_outputs[3].shape);
-        
+
         // Release outputs
-        for (var i = 2; i < b_outputs.Length; i++)
-        {
-            b_outputs[i].Dispose();
-        }
+        for (var i = 2; i < b_outputs.Length; i++) b_outputs[i].Dispose();
 
         PredictPose();
     }
-    
+
     private void PredictPose()
     {
         CalculateJointPositions();
@@ -254,7 +253,7 @@ public class PoseAnalyzer : MonoBehaviour
                     var yy = y * _heatMapColumnsSquared * TotalJoints + zz;
                     for (var x = 0; x < heatMapColumns; x++)
                     {
-                        float v = _threeDHeatMap[yy + x * _heatMapJointProduct];
+                        var v = _threeDHeatMap[yy + x * _heatMapJointProduct];
                         if (v > _jointPositions[j].Confidence3D)
                         {
                             _jointPositions[j].Confidence3D = v;
@@ -265,13 +264,13 @@ public class PoseAnalyzer : MonoBehaviour
                     }
                 }
             }
-           
+
             _jointPositions[j].CurrentPosition3D.x = (_threeDOffsets[maxYIndex * _squaredCubeOffset + maxXIndex * _linearCubeOffset + j * heatMapColumns + maxZIndex] + 0.5f + (float)maxXIndex) * _imageResizeFactor - _halfImageSize;
             _jointPositions[j].CurrentPosition3D.y = _halfImageSize - (_threeDOffsets[maxYIndex * _squaredCubeOffset + maxXIndex * _linearCubeOffset + (j + TotalJoints) * heatMapColumns + maxZIndex] + 0.5f + (float)maxYIndex) * _imageResizeFactor;
             _jointPositions[j].CurrentPosition3D.z = (_threeDOffsets[maxYIndex * _squaredCubeOffset + maxXIndex * _linearCubeOffset + (j + DoubleJointCount) * heatMapColumns + maxZIndex] + 0.5f + (float)(maxZIndex - 14)) * _imageResizeFactor;
         }
     }
-    
+
     private void CalculateSpecialJointPositions()
     {
         var lc = (_jointPositions[BodyJoint.rightUpperLeg.Int()].CurrentPosition3D + _jointPositions[BodyJoint.leftUpperLeg.Int()].CurrentPosition3D) / 2f;
@@ -287,32 +286,25 @@ public class PoseAnalyzer : MonoBehaviour
 
         _jointPositions[BodyJoint.middleSpine.Int()].CurrentPosition3D = _jointPositions[BodyJoint.upperAbdomen.Int()].CurrentPosition3D;
     }
-    
+
     private void ApplyKalmanFilter()
     {
-        foreach (var jp in _jointPositions)
-        {
-            KalmanUpdate(jp);
-        }
-    }   
-    
+        foreach (var jp in _jointPositions) KalmanUpdate(jp);
+    }
+
     private void ApplySmoothingFilter()
     {
         if (enableSmoothing)
-        {
             foreach (var jp in _jointPositions)
             {
                 jp.HistoricalPositions3D[0] = jp.Position3D;
                 for (var i = 1; i < jp.HistoricalPositions3D.Length; i++)
-                {
                     jp.HistoricalPositions3D[i] = jp.HistoricalPositions3D[i] * smoothingFactor + jp.HistoricalPositions3D[i - 1] * (1f - smoothingFactor);
-                }
                 jp.Position3D = jp.HistoricalPositions3D[jp.HistoricalPositions3D.Length - 1];
             }
-        }
     }
 
-    private void KalmanUpdate(PoseModel.JointPoint measurement)
+    private void KalmanUpdate(JointPoint measurement)
     {
         MeasurementUpdate(measurement);
         measurement.Position3D.x = measurement.EstimatedState.x + (measurement.CurrentPosition3D.x - measurement.EstimatedState.x) * measurement.KalmanGain.x;
@@ -321,7 +313,7 @@ public class PoseAnalyzer : MonoBehaviour
         measurement.EstimatedState = measurement.Position3D;
     }
 
-    private void MeasurementUpdate(PoseModel.JointPoint measurement)
+    private void MeasurementUpdate(JointPoint measurement)
     {
         measurement.KalmanGain.x = (measurement.PredictionError.x + kalmanQ) / (measurement.PredictionError.x + kalmanQ + kalmanR);
         measurement.KalmanGain.y = (measurement.PredictionError.y + kalmanQ) / (measurement.PredictionError.y + kalmanQ + kalmanR);
@@ -329,5 +321,60 @@ public class PoseAnalyzer : MonoBehaviour
         measurement.PredictionError.x = kalmanR * (measurement.PredictionError.x + kalmanQ) / (kalmanR + measurement.PredictionError.x + kalmanQ);
         measurement.PredictionError.y = kalmanR * (measurement.PredictionError.y + kalmanQ) / (kalmanR + measurement.PredictionError.y + kalmanQ);
         measurement.PredictionError.z = kalmanR * (measurement.PredictionError.z + kalmanQ) / (kalmanR + measurement.PredictionError.z + kalmanQ);
+    }
+    
+    public void UpdateVisibilityWarnings()
+    {
+        float visibilityThreshold = 0.5f;
+
+        float upperBodyConfidence = CalculateAverageConfidence(
+            BodyJoint.topHead, BodyJoint.centralNeck, BodyJoint.upperAbdomen,
+            BodyJoint.rightShoulder, BodyJoint.leftShoulder);
+
+        float lowerBodyConfidence = CalculateAverageConfidence(
+            BodyJoint.rightUpperLeg, BodyJoint.leftUpperLeg,
+            BodyJoint.rightLowerLeg, BodyJoint.leftLowerLeg,
+            BodyJoint.rightFoot, BodyJoint.leftFoot,
+            BodyJoint.rightToe, BodyJoint.leftToe);
+
+        float leftSideConfidence = CalculateAverageConfidence(
+            BodyJoint.leftShoulder, BodyJoint.leftElbow, BodyJoint.leftHand,
+            BodyJoint.leftThumb, BodyJoint.leftFinger,
+            BodyJoint.leftUpperLeg, BodyJoint.leftLowerLeg,
+            BodyJoint.leftFoot, BodyJoint.leftToe);
+
+        float rightSideConfidence = CalculateAverageConfidence(
+            BodyJoint.rightShoulder, BodyJoint.rightElbow, BodyJoint.rightHand,
+            BodyJoint.rightThumb, BodyJoint.rightFinger,
+            BodyJoint.rightUpperLeg, BodyJoint.rightLowerLeg,
+            BodyJoint.rightFoot, BodyJoint.rightToe);
+
+        targetAlphaTop = upperBodyConfidence > visibilityThreshold ? 0 : 1 - (upperBodyConfidence / visibilityThreshold);
+        targetAlphaBottom = lowerBodyConfidence > visibilityThreshold ? 0 : 1 - (lowerBodyConfidence / visibilityThreshold);
+        targetAlphaLeft = leftSideConfidence > visibilityThreshold ? 0 : 1 - (leftSideConfidence / visibilityThreshold);
+        targetAlphaRight = rightSideConfidence > visibilityThreshold ? 0 : 1 - (rightSideConfidence / visibilityThreshold);
+
+        topWarning.color = new Color(topWarning.color.r, topWarning.color.g, topWarning.color.b, Mathf.Lerp(topWarning.color.a, targetAlphaTop, Time.deltaTime / fadeDuration));
+        bottomWarning.color = new Color(bottomWarning.color.r, bottomWarning.color.g, bottomWarning.color.b, Mathf.Lerp(bottomWarning.color.a, targetAlphaBottom, Time.deltaTime / fadeDuration));
+        leftWarning.color = new Color(leftWarning.color.r, leftWarning.color.g, leftWarning.color.b, Mathf.Lerp(leftWarning.color.a, targetAlphaLeft, Time.deltaTime / fadeDuration));
+        rightWarning.color = new Color(rightWarning.color.r, rightWarning.color.g, rightWarning.color.b, Mathf.Lerp(rightWarning.color.a, targetAlphaRight, Time.deltaTime / fadeDuration));
+    }
+
+    private float CalculateAverageConfidence(params BodyJoint[] joints)
+    {
+        float sumConfidence = 0f;
+        int count = 0;
+
+        foreach (var joint in joints)
+        {
+            int index = joint.Int();
+            if (index >= 0 && index < _jointPositions.Length)
+            {
+                sumConfidence += _jointPositions[index].Confidence3D;
+                count++;
+            }
+        }
+
+        return count > 0 ? sumConfidence / count : 0f;
     }
 }

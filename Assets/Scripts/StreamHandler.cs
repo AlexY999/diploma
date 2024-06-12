@@ -36,12 +36,9 @@ public class StreamHandler : MonoBehaviour
 
     private void StartWebCamera()
     {
-        WebCamDevice[] camDevices = WebCamTexture.devices;
-        if(camDevices.Length <= CameraIndex)
-        {
-            CameraIndex = 0;
-        }
-        
+        var camDevices = WebCamTexture.devices;
+        if (camDevices.Length <= CameraIndex) CameraIndex = 0;
+
         cameraTexture = new WebCamTexture(camDevices[CameraIndex].name);
 
         var displayRect = DisplayScreen.GetComponent<RectTransform>();
@@ -56,7 +53,7 @@ public class StreamHandler : MonoBehaviour
 
         SetupOutputTexture();
     }
-    
+
     private void StartVideo()
     {
         mediaTexture = new RenderTexture((int)MediaPlayer.clip.width, (int)MediaPlayer.clip.height, 24);
@@ -65,7 +62,8 @@ public class StreamHandler : MonoBehaviour
         MediaPlayer.targetTexture = mediaTexture;
 
         var displayRect = DisplayScreen.GetComponent<RectTransform>();
-        displayRect.sizeDelta = new Vector2(screenWidth, (int)(screenWidth * MediaPlayer.clip.height / MediaPlayer.clip.width));
+        displayRect.sizeDelta =
+            new Vector2(screenWidth, (int)(screenWidth * MediaPlayer.clip.height / MediaPlayer.clip.width));
         DisplayScreen.texture = mediaTexture;
 
         MediaPlayer.Play();
@@ -77,14 +75,10 @@ public class StreamHandler : MonoBehaviour
 
         SetupOutputTexture();
     }
-
-
-    /// <summary>
-    /// Initialize Main Texture
-    /// </summary>
+    
     private void SetupOutputTexture()
     {
-        GameObject go = new GameObject("OutputTextureCamera", typeof(Camera));
+        var go = new GameObject("OutputTextureCamera", typeof(Camera));
 
         go.transform.parent = DisplayBackground.transform;
         go.transform.localScale = Vector3.one * -1;
@@ -106,15 +100,17 @@ public class StreamHandler : MonoBehaviour
         cam.allowMSAA = false;
         cam.allowHDR = false;
 
-        OutputTexture = new RenderTexture(backgroundWidth, backgroundHeight, 0, RenderTextureFormat.RGB565, RenderTextureReadWrite.sRGB)
+        OutputTexture = new RenderTexture(backgroundWidth, backgroundHeight, 0, RenderTextureFormat.RGB565,
+            RenderTextureReadWrite.sRGB)
         {
             useMipMap = false,
             autoGenerateMips = false,
             wrapMode = TextureWrapMode.Clamp,
-            filterMode = FilterMode.Point,
+            filterMode = FilterMode.Point
         };
 
         cam.targetTexture = OutputTexture;
-        if (SourceTextureObject.activeSelf) SourceTextureObject.GetComponent<Renderer>().material.mainTexture = OutputTexture;
+        if (SourceTextureObject.activeSelf)
+            SourceTextureObject.GetComponent<Renderer>().material.mainTexture = OutputTexture;
     }
 }
