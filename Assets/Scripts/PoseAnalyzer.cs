@@ -7,14 +7,8 @@ using System.Linq;
 using Unity.Barracuda;
 using Debug = UnityEngine.Debug;
 
-/// <summary>
-/// Define Joint points
-/// </summary>
 public class PoseAnalyzer : MonoBehaviour
 {
-    /// <summary>
-    /// Neural network model
-    /// </summary>
     public NNModel modelData;
 
     public WorkerFactory.Type workerType = WorkerFactory.Type.Auto;

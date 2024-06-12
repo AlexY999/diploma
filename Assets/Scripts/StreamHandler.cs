@@ -75,11 +75,7 @@ public class StreamHandler : MonoBehaviour
 
         SetupOutputTexture();
     }
-
-
-    /// <summary>
-    /// Initialize Main Texture
-    /// </summary>
+    
     private void SetupOutputTexture()
     {
         var go = new GameObject("OutputTextureCamera", typeof(Camera));

@@ -30,11 +30,7 @@ public class PoseModel : MonoBehaviour
     {
         if (_jointPoints != null) UpdatePose();
     }
-
-    /// <summary>
-    /// Initialize joint points
-    /// </summary>
-    /// <returns></returns>
+    
     public JointPoint[] Init()
     {
         _jointPoints = new JointPoint[BodyJoint.totalCount.Int()];
