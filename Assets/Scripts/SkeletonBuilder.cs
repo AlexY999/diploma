@@ -14,6 +14,7 @@ public class BoneConnection
 
 public class SkeletonBuilder : MonoBehaviour
 {
+    [Header("Skeleton Display Settings")]
     public Material connectionMaterial;
     public bool showSkeleton = true;
     public float skeletonOffsetX = 0;
@@ -21,6 +22,7 @@ public class SkeletonBuilder : MonoBehaviour
     public float skeletonOffsetZ = 0;
     public float skeletonScale = 0.008f;
 
+    [Header("Skeleton Dynamics")]
     private readonly List<BoneConnection> _boneConnections = new List<BoneConnection>();
     private bool _useSkeleton;
 

@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 982d8b4c4d3de46869e45cadac9c0502, type: 3}
+  m_Name: PoseAnalyzerConfig
+  m_EditorClassIdentifier: 
+  modelData: {fileID: 5022602860645237092, guid: 2b764c52ef22149078563ad581777af8, type: 3}
+  workerType: 32768
+  debugMode: 0
+  targetImageSize: 448
+  heatMapColumns: 28
+  enableSmoothing: 1
+  smoothingFactor: 0.2
+  kalmanQ: 0.01
+  kalmanR: 0.015
+  visibilityThreshold: 0.3
