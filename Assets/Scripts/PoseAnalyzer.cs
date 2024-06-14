@@ -9,95 +9,84 @@ using Debug = UnityEngine.Debug;
 
 public class PoseAnalyzer : MonoBehaviour
 {
-    public NNModel modelData;
+    [Header("Configuration")]
+    public PoseAnalyzerConfig poseAnalyzerConfig;
 
-    public WorkerFactory.Type workerType = WorkerFactory.Type.Auto;
-    public bool debugMode = true;
-
+    [Header("Model Components")]
     public PoseModel poseModel;
     public StreamHandler videoStreamHandler;
 
+    [Header("Internal Model Details")]
     private Model _poseModel;
     private IWorker _poseWorker;
     private JointPoint[] _jointPositions;
 
+    [Header("Pose Processing")]
     private const int TotalJoints = 24;
-
-    public int targetImageSize;
     private float _halfImageSize;
-
-    public int heatMapColumns;
     private float _imageSizeFloat;
-
     private int _heatMapColumnsSquared;
     private int _heatMapColumnsCubed;
     private float _imageResizeFactor;
-
     private float[] _twoDHeatMap;
     private float[] _twoDOffsets;
     private float[] _threeDHeatMap;
     private float[] _threeDOffsets;
     private float _scaleUnit;
-
     private const int DoubleJointCount = TotalJoints * 2;
     private const int TripleJointCount = TotalJoints * 3;
-    
     private int _heatMapJointProduct;
     private int _linearCubeOffset;
     private int _squaredCubeOffset;
 
-    public float kalmanQ;
-    public float kalmanR;
-
-    private bool _updateLock = true;
-
-    public bool enableSmoothing;
-    public float smoothingFactor;
-
+    [Header("UI Elements")]
     public Text statusMessage;
-    public float modelLoadingDelay = 0.1f;
     public Texture2D placeholderImage;
-
     public RawImage leftWarning;
     public RawImage rightWarning;
     public RawImage topWarning;
     public RawImage bottomWarning;
     
-    private float targetAlphaTop;
-    private float targetAlphaBottom;
-    private float targetAlphaLeft;
-    private float targetAlphaRight;
-    
-    private float fadeDuration = 0.2f;
+    [Header("UI Animation")]
+    private float _targetAlphaTop;
+    private float _targetAlphaBottom;
+    private float _targetAlphaLeft;
+    private float _targetAlphaRight;
+    private const float FadeDuration = 0.2f;
 
+    [Header("Performance Metrics")]
+    public float modelLoadingDelay = 0.1f;
     private float _averagePerformanceScore = 0.0f;
     private int _updateCycleCount = 0;
     private float _totalProcessingTime = 0.0f; // Загальний час обробки усіх кадрів
     private int _processedFrames = 0; // Кількість оброблених кадрів
     private readonly Stopwatch _processingTimer = new(); // Таймер для вимірювання часу обробки
     private float _averageConfidence3D = 0f;
-    
+
+    [Header("System Control")]
+    private bool _updateLock = true;
+
     private void Start()
     {
-        _heatMapColumnsSquared = heatMapColumns * heatMapColumns;
-        _heatMapColumnsCubed = heatMapColumns * heatMapColumns * heatMapColumns;
-        _heatMapJointProduct = heatMapColumns * TotalJoints;
-        _linearCubeOffset = heatMapColumns * TripleJointCount;
+        _heatMapColumnsSquared = poseAnalyzerConfig.heatMapColumns * poseAnalyzerConfig.heatMapColumns;
+        _heatMapColumnsCubed = poseAnalyzerConfig.heatMapColumns * poseAnalyzerConfig.heatMapColumns * poseAnalyzerConfig.heatMapColumns;
+        _heatMapJointProduct = poseAnalyzerConfig.heatMapColumns * TotalJoints;
+        _linearCubeOffset = poseAnalyzerConfig.heatMapColumns * TripleJointCount;
         _squaredCubeOffset = _heatMapColumnsSquared * TripleJointCount;
 
         _twoDHeatMap = new float[TotalJoints * _heatMapColumnsSquared];
         _twoDOffsets = new float[TotalJoints * _heatMapColumnsSquared * 2];
         _threeDHeatMap = new float[TotalJoints * _heatMapColumnsCubed];
         _threeDOffsets = new float[TotalJoints * _heatMapColumnsCubed * 3];
-        _scaleUnit = 1f / (float)heatMapColumns;
-        _imageSizeFloat = targetImageSize;
+        _scaleUnit = 1f / (float)poseAnalyzerConfig.heatMapColumns;
+        _imageSizeFloat = poseAnalyzerConfig.targetImageSize;
         _halfImageSize = _imageSizeFloat / 2f;
-        _imageResizeFactor = targetImageSize / (float)heatMapColumns;
+        _imageResizeFactor = poseAnalyzerConfig.targetImageSize / (float)poseAnalyzerConfig.heatMapColumns;
 
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
-        _poseModel = ModelLoader.Load(modelData, debugMode);
-        _poseWorker = WorkerFactory.CreateWorker(workerType, _poseModel, debugMode);
+        _poseModel = ModelLoader.Load(poseAnalyzerConfig.modelData, poseAnalyzerConfig.debugMode);
+        _poseWorker = WorkerFactory.CreateWorker(poseAnalyzerConfig.workerType, _poseModel, poseAnalyzerConfig.debugMode);
 
         StartCoroutine("WaitForModelLoad");
     }
@@ -167,7 +156,7 @@ public class PoseAnalyzer : MonoBehaviour
         yield return new WaitForSeconds(modelLoadingDelay);
 
         // Init VideoCapture
-        videoStreamHandler.Init(targetImageSize, targetImageSize);
+        videoStreamHandler.Init(poseAnalyzerConfig.targetImageSize, poseAnalyzerConfig.targetImageSize);
         _updateLock = false;
         statusMessage.gameObject.SetActive(false);
     }
@@ -244,14 +233,14 @@ public class PoseAnalyzer : MonoBehaviour
             var maxYIndex = 0;
             var maxZIndex = 0;
             _jointPositions[j].Confidence3D = 0.0f;
-            var jj = j * heatMapColumns;
-            for (var z = 0; z < heatMapColumns; z++)
+            var jj = j * poseAnalyzerConfig.heatMapColumns;
+            for (var z = 0; z < poseAnalyzerConfig.heatMapColumns; z++)
             {
                 var zz = jj + z;
-                for (var y = 0; y < heatMapColumns; y++)
+                for (var y = 0; y < poseAnalyzerConfig.heatMapColumns; y++)
                 {
                     var yy = y * _heatMapColumnsSquared * TotalJoints + zz;
-                    for (var x = 0; x < heatMapColumns; x++)
+                    for (var x = 0; x < poseAnalyzerConfig.heatMapColumns; x++)
                     {
                         var v = _threeDHeatMap[yy + x * _heatMapJointProduct];
                         if (v > _jointPositions[j].Confidence3D)
@@ -265,9 +254,9 @@ public class PoseAnalyzer : MonoBehaviour
                 }
             }
 
-            _jointPositions[j].CurrentPosition3D.x = (_threeDOffsets[maxYIndex * _squaredCubeOffset + maxXIndex * _linearCubeOffset + j * heatMapColumns + maxZIndex] + 0.5f + (float)maxXIndex) * _imageResizeFactor - _halfImageSize;
-            _jointPositions[j].CurrentPosition3D.y = _halfImageSize - (_threeDOffsets[maxYIndex * _squaredCubeOffset + maxXIndex * _linearCubeOffset + (j + TotalJoints) * heatMapColumns + maxZIndex] + 0.5f + (float)maxYIndex) * _imageResizeFactor;
-            _jointPositions[j].CurrentPosition3D.z = (_threeDOffsets[maxYIndex * _squaredCubeOffset + maxXIndex * _linearCubeOffset + (j + DoubleJointCount) * heatMapColumns + maxZIndex] + 0.5f + (float)(maxZIndex - 14)) * _imageResizeFactor;
+            _jointPositions[j].CurrentPosition3D.x = (_threeDOffsets[maxYIndex * _squaredCubeOffset + maxXIndex * _linearCubeOffset + j * poseAnalyzerConfig.heatMapColumns + maxZIndex] + 0.5f + (float)maxXIndex) * _imageResizeFactor - _halfImageSize;
+            _jointPositions[j].CurrentPosition3D.y = _halfImageSize - (_threeDOffsets[maxYIndex * _squaredCubeOffset + maxXIndex * _linearCubeOffset + (j + TotalJoints) * poseAnalyzerConfig.heatMapColumns + maxZIndex] + 0.5f + (float)maxYIndex) * _imageResizeFactor;
+            _jointPositions[j].CurrentPosition3D.z = (_threeDOffsets[maxYIndex * _squaredCubeOffset + maxXIndex * _linearCubeOffset + (j + DoubleJointCount) * poseAnalyzerConfig.heatMapColumns + maxZIndex] + 0.5f + (float)(maxZIndex - 14)) * _imageResizeFactor;
         }
     }
 
@@ -294,12 +283,12 @@ public class PoseAnalyzer : MonoBehaviour
 
     private void ApplySmoothingFilter()
     {
-        if (enableSmoothing)
+        if (poseAnalyzerConfig.enableSmoothing)
             foreach (var jp in _jointPositions)
             {
                 jp.HistoricalPositions3D[0] = jp.Position3D;
                 for (var i = 1; i < jp.HistoricalPositions3D.Length; i++)
-                    jp.HistoricalPositions3D[i] = jp.HistoricalPositions3D[i] * smoothingFactor + jp.HistoricalPositions3D[i - 1] * (1f - smoothingFactor);
+                    jp.HistoricalPositions3D[i] = jp.HistoricalPositions3D[i] * poseAnalyzerConfig.smoothingFactor + jp.HistoricalPositions3D[i - 1] * (1f - poseAnalyzerConfig.smoothingFactor);
                 jp.Position3D = jp.HistoricalPositions3D[jp.HistoricalPositions3D.Length - 1];
             }
     }
@@ -315,18 +304,16 @@ public class PoseAnalyzer : MonoBehaviour
 
     private void MeasurementUpdate(JointPoint measurement)
     {
-        measurement.KalmanGain.x = (measurement.PredictionError.x + kalmanQ) / (measurement.PredictionError.x + kalmanQ + kalmanR);
-        measurement.KalmanGain.y = (measurement.PredictionError.y + kalmanQ) / (measurement.PredictionError.y + kalmanQ + kalmanR);
-        measurement.KalmanGain.z = (measurement.PredictionError.z + kalmanQ) / (measurement.PredictionError.z + kalmanQ + kalmanR);
-        measurement.PredictionError.x = kalmanR * (measurement.PredictionError.x + kalmanQ) / (kalmanR + measurement.PredictionError.x + kalmanQ);
-        measurement.PredictionError.y = kalmanR * (measurement.PredictionError.y + kalmanQ) / (kalmanR + measurement.PredictionError.y + kalmanQ);
-        measurement.PredictionError.z = kalmanR * (measurement.PredictionError.z + kalmanQ) / (kalmanR + measurement.PredictionError.z + kalmanQ);
+        measurement.KalmanGain.x = (measurement.PredictionError.x + poseAnalyzerConfig.kalmanQ) / (measurement.PredictionError.x + poseAnalyzerConfig.kalmanQ + poseAnalyzerConfig.kalmanR);
+        measurement.KalmanGain.y = (measurement.PredictionError.y + poseAnalyzerConfig.kalmanQ) / (measurement.PredictionError.y + poseAnalyzerConfig.kalmanQ + poseAnalyzerConfig.kalmanR);
+        measurement.KalmanGain.z = (measurement.PredictionError.z + poseAnalyzerConfig.kalmanQ) / (measurement.PredictionError.z + poseAnalyzerConfig.kalmanQ + poseAnalyzerConfig.kalmanR);
+        measurement.PredictionError.x = poseAnalyzerConfig.kalmanR * (measurement.PredictionError.x + poseAnalyzerConfig.kalmanQ) / (poseAnalyzerConfig.kalmanR + measurement.PredictionError.x + poseAnalyzerConfig.kalmanQ);
+        measurement.PredictionError.y = poseAnalyzerConfig.kalmanR * (measurement.PredictionError.y + poseAnalyzerConfig.kalmanQ) / (poseAnalyzerConfig.kalmanR + measurement.PredictionError.y + poseAnalyzerConfig.kalmanQ);
+        measurement.PredictionError.z = poseAnalyzerConfig.kalmanR * (measurement.PredictionError.z + poseAnalyzerConfig.kalmanQ) / (poseAnalyzerConfig.kalmanR + measurement.PredictionError.z + poseAnalyzerConfig.kalmanQ);
     }
     
     public void UpdateVisibilityWarnings()
     {
-        float visibilityThreshold = 0.5f;
-
         float upperBodyConfidence = CalculateAverageConfidence(
             BodyJoint.topHead, BodyJoint.centralNeck, BodyJoint.upperAbdomen,
             BodyJoint.rightShoulder, BodyJoint.leftShoulder);
@@ -349,15 +336,15 @@ public class PoseAnalyzer : MonoBehaviour
             BodyJoint.rightUpperLeg, BodyJoint.rightLowerLeg,
             BodyJoint.rightFoot, BodyJoint.rightToe);
 
-        targetAlphaTop = upperBodyConfidence > visibilityThreshold ? 0 : 1 - (upperBodyConfidence / visibilityThreshold);
-        targetAlphaBottom = lowerBodyConfidence > visibilityThreshold ? 0 : 1 - (lowerBodyConfidence / visibilityThreshold);
-        targetAlphaLeft = leftSideConfidence > visibilityThreshold ? 0 : 1 - (leftSideConfidence / visibilityThreshold);
-        targetAlphaRight = rightSideConfidence > visibilityThreshold ? 0 : 1 - (rightSideConfidence / visibilityThreshold);
+        _targetAlphaTop = upperBodyConfidence > poseAnalyzerConfig.visibilityThreshold ? 0 : 1 - (upperBodyConfidence / poseAnalyzerConfig.visibilityThreshold);
+        _targetAlphaBottom = lowerBodyConfidence > poseAnalyzerConfig.visibilityThreshold ? 0 : 1 - (lowerBodyConfidence / poseAnalyzerConfig.visibilityThreshold);
+        _targetAlphaLeft = leftSideConfidence > poseAnalyzerConfig.visibilityThreshold ? 0 : 1 - (leftSideConfidence / poseAnalyzerConfig.visibilityThreshold);
+        _targetAlphaRight = rightSideConfidence > poseAnalyzerConfig.visibilityThreshold ? 0 : 1 - (rightSideConfidence / poseAnalyzerConfig.visibilityThreshold);
 
-        topWarning.color = new Color(topWarning.color.r, topWarning.color.g, topWarning.color.b, Mathf.Lerp(topWarning.color.a, targetAlphaTop, Time.deltaTime / fadeDuration));
-        bottomWarning.color = new Color(bottomWarning.color.r, bottomWarning.color.g, bottomWarning.color.b, Mathf.Lerp(bottomWarning.color.a, targetAlphaBottom, Time.deltaTime / fadeDuration));
-        leftWarning.color = new Color(leftWarning.color.r, leftWarning.color.g, leftWarning.color.b, Mathf.Lerp(leftWarning.color.a, targetAlphaLeft, Time.deltaTime / fadeDuration));
-        rightWarning.color = new Color(rightWarning.color.r, rightWarning.color.g, rightWarning.color.b, Mathf.Lerp(rightWarning.color.a, targetAlphaRight, Time.deltaTime / fadeDuration));
+        topWarning.color = new Color(topWarning.color.r, topWarning.color.g, topWarning.color.b, Mathf.Lerp(topWarning.color.a, _targetAlphaTop, Time.deltaTime / FadeDuration));
+        bottomWarning.color = new Color(bottomWarning.color.r, bottomWarning.color.g, bottomWarning.color.b, Mathf.Lerp(bottomWarning.color.a, _targetAlphaBottom, Time.deltaTime / FadeDuration));
+        leftWarning.color = new Color(leftWarning.color.r, leftWarning.color.g, leftWarning.color.b, Mathf.Lerp(leftWarning.color.a, _targetAlphaLeft, Time.deltaTime / FadeDuration));
+        rightWarning.color = new Color(rightWarning.color.r, rightWarning.color.g, rightWarning.color.b, Mathf.Lerp(rightWarning.color.a, _targetAlphaRight, Time.deltaTime / FadeDuration));
     }
 
     private float CalculateAverageConfidence(params BodyJoint[] joints)
