@@ -97,7 +97,7 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 0}
+  m_LightingDataAsset: {fileID: 112000000, guid: d060b98c810904ca29779d8b9929f78d, type: 2}
   m_LightingSettings: {fileID: 0}
 --- !u!196 &4
 NavMeshSettings:
@@ -632,6 +632,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1270660386}
     m_Modifications:
+    - target: {fileID: 235521100406245218, guid: 13cabdb5cdf40c74ba5db0f7167658f1, type: 3}
+      propertyPath: m_BoundingSphereOverride.w
+      value: 1.22e-43
+      objectReference: {fileID: 0}
+    - target: {fileID: 235521100406245218, guid: 13cabdb5cdf40c74ba5db0f7167658f1, type: 3}
+      propertyPath: m_BoundingSphereOverride.y
+      value: 1e-45
+      objectReference: {fileID: 0}
+    - target: {fileID: 235521100406245218, guid: 13cabdb5cdf40c74ba5db0f7167658f1, type: 3}
+      propertyPath: m_BoundingSphereOverride.z
+      value: 1.02e-43
+      objectReference: {fileID: 0}
     - target: {fileID: 446067834929914800, guid: 13cabdb5cdf40c74ba5db0f7167658f1, type: 3}
       propertyPath: m_LocalPosition.x
       value: 4.77
@@ -683,6 +695,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 235521100406245217, guid: 13cabdb5cdf40c74ba5db0f7167658f1, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1686244301}
+    - targetCorrespondingSourceObject: {fileID: 235521100243819361, guid: 13cabdb5cdf40c74ba5db0f7167658f1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 895941853}
   m_SourcePrefab: {fileID: 100100000, guid: 13cabdb5cdf40c74ba5db0f7167658f1, type: 3}
 --- !u!4 &626039616 stripped
 Transform:
@@ -764,7 +779,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: NaN, y: 1e-45, z: 1.02e-43, w: 8.4e-44}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
@@ -917,6 +932,34 @@ MonoBehaviour:
   avatarObject: {fileID: 729426690}
   avatarNose: {fileID: 718633766}
   zVerticalScale: 0.8
+--- !u!1 &895941850 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 235521100243819361, guid: 13cabdb5cdf40c74ba5db0f7167658f1, type: 3}
+  m_PrefabInstance: {fileID: 460791380}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &895941853
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 895941850}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Version: 3
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_LightLayerMask: 1
+  m_RenderingLayers: 1
+  m_CustomShadowLayers: 0
+  m_ShadowLayerMask: 1
+  m_ShadowRenderingLayers: 1
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
 --- !u!1 &945319049
 GameObject:
   m_ObjectHideFlags: 0
@@ -1889,15 +1932,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   streamConfig: {fileID: 11400000, guid: eabffb4c5f17b44ccb91c10017746c12, type: 2}
-  sourceTextureObject: {fileID: 2007410386}
+  cameraIndex: 0
+  sourceTextureObject: {fileID: 318842549}
   displayScreen: {fileID: 2082680576}
-  displayBackground: {fileID: 2082680574}
-  backgroundScaleModifier: 0
+  displayBackground: {fileID: 2007410386}
+  backgroundScaleModifier: 1
   displayLayer:
     serializedVersion: 2
     m_Bits: 4
-  cameraIndex: 0
-  mediaPlayer: {fileID: 0}
+  mediaPlayer: {fileID: 1508644618}
 --- !u!1 &2082680574
 GameObject:
   m_ObjectHideFlags: 0
